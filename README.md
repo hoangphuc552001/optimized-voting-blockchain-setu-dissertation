@@ -127,14 +127,53 @@ npm run server:dev
 ### Step 7: Test the API (Optional)
 ```bash
 # Terminal 4: Test API endpoints
+
+# Health check
 curl http://localhost:3001/health
 # Should return: {"status":"ok","timestamp":"2025-01-01T12:00:00.000Z"}
+
+# Deploy a new election (replace with your contract address)
+curl -X POST http://localhost:3001/elections \
+  -H "Content-Type: application/json" \
+  -d '{
+    "candidates": ["Alice Johnson", "Bob Smith", "Charlie Brown"],
+    "startTime": 1640995200,
+    "endTime": 1641081600
+  }'
 
 # Get election status
 curl http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/status
 
 # Get election results
 curl http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/results
+
+# Get winner (only works after election ends)
+curl http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/winner
+
+# Register voters
+curl -X POST http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/voters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "voters": [
+      "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+    ]
+  }'
+
+# Check if voter is registered
+curl http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/voters/0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+
+# Cast a vote (backend-assisted voting)
+curl -X POST http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/vote \
+  -H "Content-Type: application/json" \
+  -d '{
+    "voterAddress": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "candidateId": 0
+  }'
+
+# Example with actual contract address (replace with yours):
+# curl http://localhost:3001/elections/0x5FbDB2315678afecb367f032d93F642f64180aa3/status
+# Response: {"admin":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","startTime":1738176319,"endTime":1738176379,"isActive":false,"totalCandidates":3,"totalRegisteredVoters":0,"timeUntilStart":0,"timeUntilEnd":0}
 ```
 
 ### Step 8: Use the Frontend
@@ -144,6 +183,12 @@ curl http://localhost:3001/elections/YOUR_ELECTION_ADDRESS/results
 npx http-server public -p 8080
 
 # Then visit: http://localhost:8080
+
+# Troubleshooting:
+# - "ethers is not defined": Refresh the page (CDN loading issue)
+# - "MetaMask not detected": Install/unlock MetaMask
+# - "Contract not found": Check ELECTION_ADDRESS in public/index.html
+# - "Not registered": Register your wallet via API first
 ```
 
 ### Step 9: Cast Votes via Frontend
