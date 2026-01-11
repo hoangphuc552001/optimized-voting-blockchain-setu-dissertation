@@ -1,16 +1,21 @@
+import { config } from "dotenv";
+config(); // Load environment variables from .env file
+
 import { ethers } from "hardhat";
 import { Election } from "../typechain-types";
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
+  // Set up provider and signer
+  const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL || "http://localhost:8545");
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider);
 
   // Election contract address - replace with actual deployed address
-  const electionAddress = process.env.ELECTION_ADDRESS || "0xYourElectionContractAddress";
+  const electionAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
   console.log("Managing election at address:", electionAddress);
-  console.log("Deployer address:", deployer.address);
+  console.log("Deployer address:", wallet.address);
 
-  const election = await ethers.getContractAt("Election", electionAddress);
+  const election = await ethers.getContractAt("Election", electionAddress, wallet);
 
   const args = process.argv.slice(2);
   const command = args[0];
@@ -56,7 +61,7 @@ async function registerVoters(election: Election, voterAddresses: string[]) {
 
 async function showElectionStatus(election: Election) {
   try {
-    const [startTime, endTime, isActive, totalCandidates] = await election.getElectionStatus();
+    const [startTime, endTime, isActive, totalCandidates, totalRegisteredVoters] = await election.getElectionStatus();
     const admin = await election.admin();
 
     console.log("\nElection Status:");
@@ -65,6 +70,7 @@ async function showElectionStatus(election: Election) {
     console.log("- End Time:", new Date(Number(endTime) * 1000).toISOString());
     console.log("- Is Active:", isActive);
     console.log("- Total Candidates:", totalCandidates);
+    console.log("- Total Registered Voters:", totalRegisteredVoters);
 
     const currentTime = Math.floor(Date.now() / 1000);
     const timeUntilStart = Number(startTime) - currentTime;

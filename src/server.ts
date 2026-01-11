@@ -84,7 +84,7 @@ app.get('/elections/:address/winner', async (req, res) => {
     res.json(winner);
   } catch (error) {
     console.error('Error getting winner:', error);
-    res.status(400).json({ error: error.message || 'Failed to get winner' });
+    res.status(400).json({ error: error || 'Failed to get winner' });
   }
 });
 

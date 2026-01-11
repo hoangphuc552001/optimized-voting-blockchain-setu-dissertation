@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config(); // Load environment variables from .env file
+
 import { ethers } from "hardhat";
 import { ElectionService } from "../src/services/ElectionService";
 

@@ -1,5 +1,5 @@
-import { ethers, Contract, Signer } from 'ethers';
-import { Election } from '../../typechain-types';
+import { ethers, isAddress, Signer, Contract } from 'ethers';
+import { Election__factory, Election } from '../../typechain-types';
 
 export interface ElectionStatus {
   admin: string;
@@ -34,7 +34,15 @@ export class ElectionService {
   }
 
   async deployElection(candidates: string[], startTime: number, endTime: number): Promise<string> {
-    const ElectionFactory = await ethers.getContractFactory("Election", this.signer);
+    // Try to use hardhat ethers first, fallback to standard ethers if not available
+    let ethersLib: any;
+    try {
+      ethersLib = await import('hardhat');
+    } catch {
+      ethersLib = ethers;
+    }
+
+    const ElectionFactory = await ethersLib.ethers.getContractFactory("Election", this.signer);
     const election = await ElectionFactory.deploy(candidates, startTime, endTime);
     await election.waitForDeployment();
 
@@ -42,7 +50,7 @@ export class ElectionService {
   }
 
   async getElectionContract(address: string): Promise<Election> {
-    return await ethers.getContractAt("Election", address, this.signer);
+    return Election__factory.connect(address, this.signer);
   }
 
   async getElectionStatus(address: string): Promise<ElectionStatus> {
