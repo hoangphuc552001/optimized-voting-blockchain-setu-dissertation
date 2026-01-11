@@ -4,27 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blockchain Voting System</title>
-    <!-- Load ethers.js from CDN with fallback -->
     <script>
-        // Global flag to track ethers loading
         window.ethersLoaded = false;
         window.ethersLoadAttempts = 0;
 
         function loadEthersFallback() {
             window.ethersLoadAttempts++;
             if (window.ethersLoadAttempts >= 3) {
-                console.error('All ethers.js loading attempts failed');
                 alert('Failed to load ethers.js library. Please check your internet connection and refresh the page.');
                 return;
             }
 
-            console.log('Attempting to load ethers.js fallback...');
-            // Try alternative CDN
             const fallbackScript = document.createElement('script');
             fallbackScript.src = 'https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js';
             fallbackScript.onload = function() {
                 window.ethersLoaded = true;
-                console.log('Ethers.js loaded from fallback CDN');
             };
             fallbackScript.onerror = loadEthersFallback;
             document.head.appendChild(fallbackScript);
@@ -33,15 +27,14 @@
         function checkEthersLoaded() {
             if (typeof ethers !== 'undefined') {
                 window.ethersLoaded = true;
-                console.log('Ethers.js loaded successfully, version:', ethers.version);
                 return true;
             }
             return false;
         }
     </script>
     <script src="https://cdn.ethers.org/lib/ethers-5.7.2.umd.min.js"
-            onload="window.ethersLoaded = true; console.log('Ethers.js loaded from primary CDN');"
-            onerror="console.warn('Primary CDN failed, trying fallback...'); loadEthersFallback();"></script>
+            onload="window.ethersLoaded = true;"
+            onerror="loadEthersFallback();"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -165,14 +158,13 @@
     </div>
 
     <script>
-        const ELECTION_ADDRESS = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9'; // Local deployed contract
+        const ELECTION_ADDRESS = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
 
         let provider;
         let signer;
         let electionContract;
         let userAddress;
 
-        // Contract ABI (simplified - you'd normally import this)
         const ELECTION_ABI = [
             "function admin() view returns (address)",
             "function startTime() view returns (uint256)",
@@ -189,16 +181,13 @@
 
         async function init() {
             try {
-                // Wait for ethers to load (with extended timeout)
                 let attempts = 0;
                 while (!window.ethersLoaded && typeof ethers === 'undefined' && attempts < 100) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                     attempts++;
                 }
 
-                // Final check if ethers loaded
                 if (!checkEthersLoaded()) {
-                    console.error('Ethers.js library failed to load after all attempts');
                     document.getElementById('electionStatus').textContent = 'Error: Ethers.js library not loaded. Please refresh the page.';
                     alert('Error: Ethers.js library not loaded. Please check your internet connection and refresh the page.');
                     return;
@@ -206,22 +195,14 @@
 
                 if (typeof window.ethereum !== 'undefined') {
                     provider = new ethers.providers.Web3Provider(window.ethereum);
-                    console.log('MetaMask detected and provider initialized');
-
-                    // Check if we're on the right network
-                    const network = await provider.getNetwork();
-                    console.log('Connected to network:', network.name, 'Chain ID:', network.chainId);
-
                     await loadElection();
                 } else {
-                    console.warn('MetaMask not detected');
                     document.getElementById('walletStatus').textContent = 'MetaMask not installed';
                     document.getElementById('connectWallet').disabled = true;
                     document.getElementById('connectWallet').textContent = 'Install MetaMask';
                     alert('Please install MetaMask to use this application');
                 }
             } catch (error) {
-                console.error('Error initializing application:', error);
                 document.getElementById('electionStatus').textContent = 'Error initializing application';
                 alert('Error initializing application: ' + error.message);
             }
@@ -229,21 +210,16 @@
 
         async function connectWallet() {
             try {
-                console.log('Connecting wallet...');
-
-                // Check if ethers is loaded
                 if (!checkEthersLoaded()) {
                     alert('Ethers.js library not loaded. Please refresh the page.');
                     return;
                 }
 
-                // Check if provider exists
                 if (!provider) {
                     alert('Wallet provider not initialized. Please refresh the page.');
                     return;
                 }
 
-                // Check if MetaMask is available
                 if (!window.ethereum) {
                     alert('Please install MetaMask to use this application');
                     return;
@@ -256,7 +232,6 @@
                 document.getElementById('connectWallet').style.display = 'none';
                 await loadElection();
             } catch (error) {
-                console.error('Error connecting wallet:', error);
                 alert('Error connecting wallet: ' + error.message);
             }
         }
@@ -264,20 +239,14 @@
         async function loadElection() {
             try {
                 if (!provider) {
-                    console.warn('Provider not available, skipping election load');
                     return;
                 }
 
-                const network = await provider.getNetwork();
-                console.log('Connected to network:', network.name);
-
-                // Check if contract address is set
                 if (ELECTION_ADDRESS === '0xYourElectionContractAddress') {
                     const contractStatus = document.getElementById('contractStatus');
                     contractStatus.style.display = 'block';
                     contractStatus.textContent = '⚠️ Please update ELECTION_ADDRESS in the code with your deployed contract address';
                     contractStatus.className = 'status inactive';
-                    console.warn('ELECTION_ADDRESS not updated');
                     return;
                 }
 
@@ -287,16 +256,11 @@
                 await loadCandidates();
                 await loadResults();
 
-                // Listen for new votes
-                await electionContract.on('VoteCast', (voter, candidateId) => {
-                    console.log('New vote:', voter, candidateId);
+                await electionContract.on('VoteCast', () => {
                     loadResults();
                 });
 
-                console.log('Election loaded successfully');
-
             } catch (error) {
-                console.error('Error loading election:', error);
                 document.getElementById('electionStatus').textContent = 'Error loading election contract: ' + error.message;
                 document.getElementById('candidatesList').textContent = 'Failed to load candidates';
                 document.getElementById('results').textContent = 'Failed to load results';
@@ -328,9 +292,7 @@
                 statusDiv.className = `status ${status}`;
                 statusDiv.textContent = statusText;
 
-            } catch (error) {
-                console.error('Error updating election status:', error);
-            }
+            } catch (error) {}
         }
 
         async function loadCandidates() {
@@ -355,7 +317,6 @@
                 await updateVoteButtons();
 
             } catch (error) {
-                console.error('Error loading candidates:', error);
                 document.getElementById('candidatesList').textContent = 'Error loading candidates';
             }
         }
@@ -366,7 +327,6 @@
             try {
                 const isRegistered = await electionContract.isRegisteredVoter(userAddress);
                 const hasVoted = await electionContract.hasVoted(userAddress);
-
                 const candidatesCount = await electionContract.getCandidatesCount();
 
                 for (let i = 0; i < candidatesCount; i++) {
@@ -383,9 +343,7 @@
                         }
                     }
                 }
-            } catch (error) {
-                console.error('Error updating vote buttons:', error);
-            }
+            } catch (error) {}
         }
 
         async function loadResults() {
@@ -399,20 +357,16 @@
                     resultsDiv.innerHTML += `<p>${name}: ${voteCount} votes</p>`;
                 }
 
-                // Try to load winner if election ended
                 try {
                     const [winnerId, winnerName, winnerVotes] = await electionContract.getWinner();
                     const winnerDiv = document.getElementById('winner');
                     winnerDiv.className = 'winner';
                     winnerDiv.innerHTML = `<h3>🏆 Winner: ${winnerName}</h3><p>${winnerVotes} votes</p>`;
                 } catch (error) {
-                    // Election still active
                     document.getElementById('winner').className = 'winner hidden';
                 }
 
-            } catch (error) {
-                console.error('Error loading results:', error);
-            }
+            } catch (error) {}
         }
 
         async function vote(candidateId) {
@@ -434,10 +388,8 @@
 
                 const electionWithSigner = electionContract.connect(signer);
                 const tx = await electionWithSigner.vote(candidateId);
-                console.log('Vote transaction submitted:', tx.hash);
 
                 await tx.wait();
-                console.log('Vote transaction confirmed');
 
                 button.textContent = 'Voted!';
                 alert('Vote cast successfully! Transaction: ' + tx.hash);
@@ -446,11 +398,9 @@
                 await updateVoteButtons();
 
             } catch (error) {
-                console.error('Error voting:', error);
                 const errorMessage = error.reason || error.message || 'Unknown error';
                 alert('Error casting vote: ' + errorMessage);
 
-                // Reset button state
                 const button = document.getElementById(`voteBtn${candidateId}`);
                 if (button) {
                     button.textContent = 'Vote';
@@ -461,23 +411,7 @@
             }
         }
 
-        // Event listeners
         document.getElementById('connectWallet').addEventListener('click', connectWallet);
-
-        // Add a simple test function for debugging
-        window.testEthers = function() {
-            if (typeof ethers !== 'undefined') {
-                console.log('✅ Ethers loaded:', ethers.version);
-                alert('Ethers.js loaded successfully! Version: ' + ethers.version);
-                return true;
-            } else {
-                console.error('❌ Ethers not loaded');
-                alert('Ethers.js not loaded!');
-                return false;
-            }
-        };
-
-        // Initialize on page load
         window.addEventListener('load', init);
     </script>
 </body>
