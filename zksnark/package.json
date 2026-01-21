@@ -1,0 +1,17 @@
+{
+  "name": "snark-project",
+  "version": "1.0.0",
+  "description": "Project to run snarkjs proof generation",
+  "main": "snark.js",
+  "scripts": {
+    "start": "node snark.js",
+    "witness": "node generate_witness.js circuit.wasm input.json witness.wtns",
+    "prove": "node snark.js",
+    "test": "echo \"No tests\" && exit 0"
+  },
+  "dependencies": {
+    "snarkjs": "^0.7.5"
+  },
+  "author": "",
+  "license": "ISC"
+}
