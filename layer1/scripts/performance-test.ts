@@ -2,7 +2,6 @@ import { config } from "dotenv";
 config(); // Load environment variables from .env file
 
 import { ethers } from "hardhat";
-import { Election } from "../typechain-types";
 
 interface VoteMetrics {
   voterIndex: number;
@@ -74,8 +73,8 @@ class VotingPerformanceAnalyzer {
 
     const candidates = ["Alice Johnson", "Bob Smith", "Charlie Brown"];
     const currentTime = Math.floor(Date.now() / 1000);
-    const startTime = currentTime + 10; // Start in 10 seconds
-    const endTime = startTime + 3600; // End in 1 hour
+    const startTime = currentTime - 60; // Start 1 minute ago (already active)
+    const endTime = startTime + 3600; // End in 1 hour from start
 
     const election = await ElectionFactory.deploy(candidates, startTime, endTime);
     await election.waitForDeployment();
@@ -93,7 +92,13 @@ class VotingPerformanceAnalyzer {
     const batchSize = 50;
     for (let i = 0; i < voterAddresses.length; i += batchSize) {
       const batch = voterAddresses.slice(i, i + batchSize);
+      console.log(`   Registering batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(voterAddresses.length / batchSize)} (${batch.length} voters)`);
       await election.batchRegisterVoters(batch);
+
+      // Delay between batches to avoid nonce conflicts
+      if (i + batchSize < voterAddresses.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
   }
 
@@ -137,9 +142,9 @@ class VotingPerformanceAnalyzer {
 
         metrics.push(voteMetric);
 
-        // Small delay between votes to avoid overwhelming the network
+        // Further increased delay between votes to avoid nonce conflicts
         if (i < voters.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
 
       } catch (error) {
@@ -237,23 +242,13 @@ ${results.individualVotes.map((v, i) =>
 }
 
 async function main() {
-  const testScenarios = [10, 100, 1000]; // Small, medium, large scale tests
+  const testScenarios = [50, 100, 500]; // Performance test scenarios
 
-  // Setup provider and accounts
+  // Setup provider
   const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL || "http://localhost:8545");
 
-  // Create multiple test accounts
-  const baseWallet = new ethers.Wallet(process.env.PRIVATE_KEY || "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", provider);
-  const accounts: ethers.Wallet[] = [baseWallet];
-
-  // Generate additional accounts for large-scale testing
-  for (let i = 1; i < 1000; i++) {
-    const wallet = ethers.Wallet.createRandom().connect(provider);
-    // Fund the wallet with some ETH from base account (simplified - in practice you'd need proper funding)
-    accounts.push(wallet);
-  }
-
-  const analyzer = new VotingPerformanceAnalyzer(provider, accounts);
+  // Use a consistent Hardhat account that gets reset with the network
+  const baseWallet = new ethers.Wallet("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", provider);
 
   console.log("🧪 BLOCKCHAIN VOTING SYSTEM - PERFORMANCE ANALYSIS");
   console.log("Network:", process.env.SEPOLIA_RPC_URL?.includes('sepolia') ? 'Sepolia Testnet' : 'Local Hardhat');
@@ -263,16 +258,32 @@ async function main() {
 
   for (const voterCount of testScenarios) {
     try {
-      // Check if we have enough accounts
-      if (accounts.length < voterCount) {
-        console.log(`⚠️  Skipping ${voterCount} voter test - only ${accounts.length} accounts available`);
-        continue;
-      }
+      console.log(`\n🔄 Preparing fresh accounts for ${voterCount} voters...`);
 
+      // Use pre-funded Hardhat accounts to avoid funding issues
+      // Hardhat provides 20 accounts with 10,000 ETH each by default
+      const allSigners = await ethers.getSigners();
+      const accounts = allSigners.slice(0, voterCount + 1); // +1 for admin
+
+      console.log(`✅ Using ${accounts.length} pre-funded Hardhat accounts (${voterCount} voters + 1 admin)`);
+      console.log(`   Admin: ${accounts[0].address.slice(0, 10)}... (balance: ${(await provider.getBalance(accounts[0].address)) / ethers.parseEther("1")} ETH)`);
+      console.log(`   First voter: ${accounts[1].address.slice(0, 10)}... (balance: ${(await provider.getBalance(accounts[1].address)) / ethers.parseEther("1")} ETH)`);
+
+      // Wait for network to settle before starting test
+      console.log("⏳ Waiting for network to settle...");
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      const analyzer = new VotingPerformanceAnalyzer(provider, accounts);
       const results = await analyzer.runPerformanceTest(voterCount);
       allResults.push(results);
 
       console.log(VotingPerformanceAnalyzer.formatResults(results));
+
+      // Delay between test scenarios to let network settle
+      if (voterCount !== testScenarios[testScenarios.length - 1]) {
+        console.log("⏳ Waiting 10 seconds before next test scenario...");
+        await new Promise(resolve => setTimeout(resolve, 10000));
+      }
 
     } catch (error) {
       console.error(`❌ Test failed for ${voterCount} voters:`, error);

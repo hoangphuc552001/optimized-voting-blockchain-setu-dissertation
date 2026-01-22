@@ -1,5 +1,5 @@
-import { ethers, isAddress, Signer, Contract } from 'ethers';
-import { Election__factory, Election } from '../../typechain-types';
+import {ethers, Signer} from 'ethers';
+import {Election, Election__factory} from '../../typechain-types';
 
 export interface ElectionStatus {
   admin: string;
@@ -37,8 +37,10 @@ export class ElectionService {
     // Try to use hardhat ethers first, fallback to standard ethers if not available
     let ethersLib: any;
     try {
+      console.log('Using Hardhat ethers for deployment');
       ethersLib = await import('hardhat');
     } catch {
+        console.log('Using standard ethers for deployment');
       ethersLib = ethers;
     }
 
