@@ -136,7 +136,7 @@ class VotingPerformanceAnalyzer {
           gasPrice: receipt.gasPrice || 0n,
           totalCostWei: receipt.gasUsed * (receipt.gasPrice || 0n),
           blockNumber: receipt.blockNumber,
-          timestamp: block?.timestamp || 0,
+          timestamp: Math.floor(Date.now() / 1000),
           transactionHash: receipt.hash
         };
 
