@@ -28,9 +28,21 @@ For the fastest way to get everything running:
 npm install
 
 # 2. Create basic .env file
-echo "SEPOLIA_RPC_URL=http://localhost:8545
+echo "# Local Development Configuration
+# Leave SEPOLIA_RPC_URL commented out for local development
+# SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
+
+# Default Hardhat private key (first account)
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-ELECTION_ADDRESS=" > .env
+
+# Latest deployed contract address on localhost:8545
+ELECTION_ADDRESS=
+
+# API Server Configuration
+PORT=3001
+
+# Uncomment for Sepolia testnet deployment
+# ETHERSCAN_API_KEY=your_etherscan_api_key" > .env
 
 # 3. Start local blockchain (Terminal 1)
 npm run node
@@ -38,19 +50,25 @@ npm run node
 # 4. Run quick setup (Terminal 2) - This does everything!
 npm run quick-start
 
+# Alternative: Manual deployment to running network
+# npm run deploy:local  # Always deploys to localhost:8545
+
 # 5. Start backend API (Terminal 3)
 npm run server:dev
 
 # 6. Open frontend in browser
 # Visit: public/index.html
 # OR: npx http-server public -p 8080
+# OR: cd public && python -m http.server 8080
 ```
 
 That's it! The quick-start script will:
-- ✅ Deploy an election contract
-- ✅ Register test voters
+- ✅ Deploy an election contract to your local Hardhat network
+- ✅ Register test voters automatically
 - ✅ Display all connection details
 - ✅ Provide next-step instructions
+
+**Note**: Use `npm run deploy:local` for guaranteed deployment to your running Hardhat node, avoiding "contract not found" errors.
 
 ## Detailed End-to-End Setup & Running Guide
 
@@ -93,13 +111,16 @@ npm run node
 
 ### Step 4: Deploy Election Contract
 ```bash
-# Terminal 2: Deploy the election contract
+# Terminal 2: Deploy the election contract to your running Hardhat node
+npm run deploy:local
+
+# Alternative: Use the legacy command (may create temporary network)
 npm run deploy
 
 # You should see output like:
 # Election contract deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 #
-# Copy this address for the next steps
+# Copy this address for the next steps and update ELECTION_ADDRESS in .env
 ```
 
 ### Step 5: Register Voters
@@ -248,9 +269,15 @@ npm run manage:sepolia status
 
 ### Common Issues:
 
+**"WARNING: Calling an account which is not a contract"**
+- **Problem**: Contract deployed to temporary network, API connecting to different network
+- **Solution**: Use `npm run deploy:local` instead of `npm run deploy`
+- **Prevention**: Always start Hardhat node (`npm run node`) before deploying
+
 **"Contract deployment failed"**
 - Make sure Hardhat node is running (`npm run node`)
 - Check your private key in .env file
+- Try `npm run deploy:local` for guaranteed local deployment
 
 **"MetaMask can't connect"**
 - Make sure you're connected to the right network
@@ -283,8 +310,15 @@ curl $SEPOLIA_RPC_URL \
 
 ## Deployment
 
-### Local Development
+### Local Development (Recommended)
 ```bash
+# Start Hardhat node first
+npm run node
+
+# Deploy to the running local network
+npm run deploy:local
+
+# Alternative: Legacy command (may create temporary network)
 npm run deploy
 ```
 
@@ -392,15 +426,37 @@ npm run performance:analysis:sepolia
 - Network congestion effects
 - Resource utilization patterns
 
+## Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run node` | Start local Hardhat blockchain network |
+| `npm run compile` | Compile Solidity smart contracts |
+| `npm run test` | Run unit tests |
+| `npm run test:gas` | Run tests with gas reporting |
+| `npm run quick-start` | One-click setup: deploy contract + register voters |
+| `npm run deploy:local` | Deploy to running Hardhat node (recommended) |
+| `npm run deploy` | Deploy to default network (may create temporary network) |
+| `npm run deploy:sepolia` | Deploy to Sepolia testnet |
+| `npm run manage` | Election management utilities (local) |
+| `npm run manage:sepolia` | Election management utilities (Sepolia) |
+| `npm run performance` | Run basic performance tests |
+| `npm run performance:sepolia` | Run performance tests on Sepolia |
+| `npm run performance:analysis` | Advanced performance analysis |
+| `npm run server:dev` | Start backend API server with auto-reload |
+| `npm run server` | Start backend API server |
+| `npm run monitor` | Start election monitoring service |
+| `npm run coverage` | Generate test coverage reports |
+
 ## Project Structure
 
 ```
 ├── contracts/          # Solidity smart contracts
 │   └── Election.sol
 ├── scripts/            # Deployment and management scripts
-│   ├── deploy.ts
-│   ├── manage-election.ts
-│   ├── quick-start.ts
+│   ├── deploy.ts                 # Contract deployment
+│   ├── manage-election.ts        # Election management utilities
+│   ├── quick-start.ts           # One-click setup script
 │   ├── performance-test.ts      # Basic performance testing
 │   └── performance-analysis.ts  # Advanced dissertation analysis
 ├── src/                # Backend TypeScript source
@@ -414,7 +470,8 @@ npm run performance:analysis:sepolia
 │   └── Election.test.ts
 ├── hardhat.config.ts   # Hardhat configuration
 ├── tsconfig.json       # TypeScript configuration
-└── package.json        # Dependencies and scripts
+├── package.json        # Dependencies and scripts
+└── .env                # Environment configuration
 ```
 
 ## Security Features
