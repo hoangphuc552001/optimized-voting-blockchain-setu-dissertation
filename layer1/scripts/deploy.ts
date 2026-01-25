@@ -8,7 +8,7 @@ async function main() {
 
   // Define election parameters
   const candidateNames = ["Alice Johnson", "Bob Smith", "Charlie Brown"];
-  const startTime = Math.floor(Date.now() / 1000) + 3600; // Start in 1 hour
+  const startTime = Math.floor(Date.now() / 1000);
   const endTime = startTime + 86400; // End in 24 hours
 
   console.log("Election parameters:");

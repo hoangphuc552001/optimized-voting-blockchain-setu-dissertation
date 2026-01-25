@@ -146,12 +146,11 @@ export class ElectionService {
   }
 
   async castVote(electionAddress: string, voterAddress: string, candidateId: number): Promise<string> {
-    // Create a new signer for the voter (this would typically come from user's wallet)
-    // For this demo, we'll use the admin signer, but in production you'd need
-    // the voter's signature/metamask integration
+    // TESTING ONLY: Use adminVoteFor function to vote on behalf of registered voters
+    // In production, this should NEVER be done!
     const election = await this.getElectionContract(electionAddress);
 
-    // Check if the signer is registered and hasn't voted
+    // Check if the voter is registered and hasn't voted (same checks as before)
     const isRegistered = await election.isRegisteredVoter(voterAddress);
     if (!isRegistered) {
       throw new Error('Voter is not registered');
@@ -162,9 +161,17 @@ export class ElectionService {
       throw new Error('Voter has already voted');
     }
 
-    // For backend-assisted voting, we'd need to create a transaction that the voter signs
-    // For now, this is a simplified version - in production, this should be done client-side
-    throw new Error('Direct backend voting not implemented. Use client-side wallet integration.');
+    // Use adminVoteFor function - admin (this.signer) votes on behalf of the voter
+    const electionWithAdmin = election.connect(this.signer);
+    const tx = await electionWithAdmin.adminVoteFor(voterAddress, candidateId);
+    const receipt = await tx.wait();
+
+    if (!receipt) {
+      throw new Error('Transaction failed - no receipt received');
+    }
+
+    console.log(`Admin voted for ${voterAddress} on candidate ${candidateId}`);
+    return receipt.hash;
   }
 
   async getVoteEvents(electionAddress: string, fromBlock?: number): Promise<any[]> {

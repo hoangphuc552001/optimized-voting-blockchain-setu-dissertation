@@ -77,6 +77,19 @@ contract Election {
         emit VoteCast(msg.sender, candidateId);
     }
 
+    // TESTING ONLY: Allow admin to vote on behalf of registered voters
+    // This should NEVER be used in production!
+    function adminVoteFor(address voter, uint candidateId) external onlyAdmin onlyDuringVotingPeriod {
+        require(isRegisteredVoter[voter], "Voter not registered");
+        require(!hasVoted[voter], "Voter has already voted");
+        require(candidateId < candidates.length, "Invalid candidate ID");
+
+        hasVoted[voter] = true;
+        candidates[candidateId].voteCount++;
+
+        emit VoteCast(voter, candidateId);
+    }
+
     function getWinner() external view returns (uint winnerId, string memory winnerName, uint winnerVotes) {
         require(block.timestamp > endTime, "Election is still active");
 
