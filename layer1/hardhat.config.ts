@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
@@ -7,8 +8,14 @@ const config: HardhatUserConfig = {
     hardhat: {
     },
     sepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      url: process.env.SEPOLIA_RPC_URL ? process.env.SEPOLIA_RPC_URL : undefined,
+      accounts: process.env.PRIVATE_KEY
+        ? [
+            process.env.PRIVATE_KEY.startsWith("0x")
+              ? process.env.PRIVATE_KEY
+              : `0x${process.env.PRIVATE_KEY}`,
+          ]
+        : undefined,
     }
   },
   gasReporter: {
