@@ -90,6 +90,20 @@ contract Election {
         emit VoteCast(voter, candidateId);
     }
 
+    // PERFORMANCE TESTING ONLY: Allow any relayer to vote on behalf of registered voters
+    // This bypasses admin restrictions for large-scale performance testing
+    // NEVER USE IN PRODUCTION - SECURITY RISK!
+    function relayerVoteFor(address voter, uint candidateId) external onlyDuringVotingPeriod {
+        require(isRegisteredVoter[voter], "Voter not registered");
+        require(!hasVoted[voter], "Voter has already voted");
+        require(candidateId < candidates.length, "Invalid candidate ID");
+
+        hasVoted[voter] = true;
+        candidates[candidateId].voteCount++;
+
+        emit VoteCast(voter, candidateId);
+    }
+
     function getWinner() external view returns (uint winnerId, string memory winnerName, uint winnerVotes) {
         require(block.timestamp > endTime, "Election is still active");
 
