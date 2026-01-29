@@ -545,20 +545,39 @@ ${results.individualVotes.map((v, i) =>
     csvData.push(['Duration (seconds)', (results.timeRange.durationMs / 1000).toFixed(2)]);
     csvData.push(['']);
     csvData.push(['Individual Transaction Metrics']);
-    csvData.push(['Voter Index', 'Voter Address', 'Gas Used', 'Gas Price (wei)', 'Total Cost (wei)', 'Block Number', 'Timestamp']);
+    // CSV headers (accurate naming)
+    csvData.push([
+      "Voter Index",
+      "Voter Address",
+      "Gas Used",
+      "Effective Gas Price (wei)",
+      "Effective Gas Price (gwei)",
+      "Transaction Fee (wei) = gasUsed * effectiveGasPrice",
+      "Transaction Fee (gwei)",
+      "Transaction Fee (ETH)",
+      "Block Number",
+      "Timestamp"
+    ]);
 
-    // Add individual transaction data
-    results.transactionMetrics.forEach(metric => {
+    results.transactionMetrics.forEach((m) => {
+      const gasUsed = BigInt(m.gasUsed);
+      const effectiveGasPrice = BigInt(m.gasPrice);
+      const txFeeWei = gasUsed * effectiveGasPrice;
+
       csvData.push([
-        metric.voterIndex.toString(),
-        metric.voterAddress,
-        metric.gasUsed.toString(),
-        metric.gasPrice.toString(),
-        metric.totalCostWei.toString(),
-        metric.blockNumber.toString(),
-        new Date(metric.timestampMs).toISOString()
+        String(m.voterIndex),
+        m.voterAddress,
+        gasUsed.toString(),
+        effectiveGasPrice.toString(),
+        ethers.formatUnits(effectiveGasPrice, "gwei"),
+        txFeeWei.toString(),
+        ethers.formatUnits(txFeeWei, "gwei"),
+        ethers.formatEther(txFeeWei),
+        String(m.blockNumber),
+        new Date(m.timestampMs).toISOString()
       ]);
     });
+
 
     // Convert to CSV string
     const csvContent = csvData.map(row =>
@@ -614,9 +633,10 @@ ${"=".repeat(80)}
 async function main() {
   // Large-scale voting scenarios: Generate many voter addresses, use few funded accounts
   const testScenarios = [
-    { voters: 500, description: "Medium scale test (500 voters)" },
+    { voters: 500, description: "Basic scale test (500 voters)" },
     { voters: 2000, description: "Large scale test (2k voters)" },
-    { voters: 5000, description: "Massive scale test (5k voters)" }
+    { voters: 5000, description: "Massive scale test (5k voters)" },
+    { voters: 10000, description: "Extreme scale test (10k voters)" }
   ];
 
   // Setup provider
