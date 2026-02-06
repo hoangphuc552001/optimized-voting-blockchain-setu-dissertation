@@ -1,13 +1,14 @@
-import { config } from "dotenv";
-config(); // Load environment variables from .env file
-
-import { ethers } from "hardhat";
+import {config} from "dotenv";
+import {ethers} from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
+
+config();
 
 interface VoteMetrics {
   voterIndex: number;
   voterAddress: string;
+  candidateId: number;      // Which candidate was voted for
   gasUsed: bigint;
   gasPrice: bigint;
   totalCostWei: bigint;
@@ -15,6 +16,21 @@ interface VoteMetrics {
   timestampMs: number; // milliseconds since epoch (Date.now())
   transactionIndex?: number;
   transactionHash: string;
+}
+
+const CANDIDATE_NAMES = [
+  "Alice Johnson", "Bob Smith", "Charlie Brown", "Diana Prince",
+  "Edward Norton", "Fiona Apple", "George Washington", "Helen Troy",
+  "Ivan Petrov", "Julia Roberts", "Kevin Hart", "Lisa Simpson",
+  "Michael Jordan", "Nancy Drew", "Oscar Wilde", "Pamela Anderson",
+  "Quinn Hughes", "Rachel Green", "Steve Rogers", "Tina Turner"
+];
+
+function getCandidateName(candidateId: number): string {
+  if (candidateId >= 0 && candidateId < CANDIDATE_NAMES.length) {
+    return CANDIDATE_NAMES[candidateId];
+  }
+  return `Candidate ${candidateId}`;
 }
 
 interface PerformanceResults {
@@ -77,35 +93,28 @@ class VotingPerformanceAnalyzer {
     console.log(`\n🚀 Starting Performance Test with ${voterCount} voters`);
     console.log("=".repeat(60));
 
-    // Deploy election
     const electionAddress = await this.deployElection();
     console.log(`✅ Election deployed at: ${electionAddress}`);
 
-    // Register voters
     const voters = this.accounts.slice(0, voterCount);
     await this.registerVoters(electionAddress, voters);
     console.log(`✅ Registered ${voters.length} voters`);
 
-    // Send votes and collect metrics
     const voteMetrics = await this.sendVotesAndMeasure(electionAddress, voters);
     console.log(`✅ Collected ${voteMetrics.length} vote transactions`);
 
-    // Calculate performance metrics
-    const results = await this.calculatePerformanceMetrics(voteMetrics, voterCount);
-
-    return results;
+    return await this.calculatePerformanceMetrics(voteMetrics, voterCount);
   }
 
   private async deployElection(): Promise<string> {
     const admin = this.accounts[0]; // Use first account as admin
     const ElectionFactory = await ethers.getContractFactory("Election", admin);
 
-    const candidates = ["Alice Johnson", "Bob Smith", "Charlie Brown"];
     const currentTime = Math.floor(Date.now() / 1000);
     const startTime = currentTime - 60; // Start 1 minute ago (already active)
     const endTime = startTime + 3600; // End in 1 hour from start
 
-    const election = await ElectionFactory.deploy(candidates, startTime, endTime);
+    const election = await ElectionFactory.deploy(CANDIDATE_NAMES, startTime, endTime);
     await election.waitForDeployment();
 
     return await election.getAddress();
@@ -117,14 +126,12 @@ class VotingPerformanceAnalyzer {
 
     const voterAddresses = voters.map(v => v.address);
 
-    // Register voters in batches to avoid gas limits
     const batchSize = 50;
     for (let i = 0; i < voterAddresses.length; i += batchSize) {
       const batch = voterAddresses.slice(i, i + batchSize);
       console.log(`   Registering batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(voterAddresses.length / batchSize)} (${batch.length} voters)`);
       await election.batchRegisterVoters(batch);
 
-      // Delay between batches to avoid nonce conflicts
       if (i + batchSize < voterAddresses.length) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
@@ -137,7 +144,6 @@ class VotingPerformanceAnalyzer {
 
     console.log("\n📊 Sending votes and measuring performance...");
 
-    // Send votes sequentially to measure individual performance
     for (let i = 0; i < voters.length; i++) {
       const voter = voters[i];
       const electionWithVoter = election.connect(voter);
@@ -145,8 +151,7 @@ class VotingPerformanceAnalyzer {
       console.log(`   Voting ${i + 1}/${voters.length} - ${voter.address.slice(0, 10)}...`);
 
       try {
-        // Random candidate selection (0, 1, or 2)
-        const candidateId = Math.floor(Math.random() * 3);
+        const candidateId = Math.floor(Math.random() * 20);
 
         const tx = await electionWithVoter.vote(candidateId);
         const receipt = await tx.wait();
@@ -155,12 +160,12 @@ class VotingPerformanceAnalyzer {
           throw new Error(`Transaction failed for voter ${i}`);
         }
 
-        // Get block details
         const block = await this.provider.getBlock(receipt.blockNumber);
 
         const voteMetric: VoteMetrics = {
           voterIndex: i,
           voterAddress: voter.address,
+          candidateId,
           gasUsed: receipt.gasUsed,
           gasPrice: receipt.gasPrice || 0n,
           totalCostWei: (receipt.gasUsed * (receipt.gasPrice || 0n)) as unknown as bigint,
@@ -172,14 +177,12 @@ class VotingPerformanceAnalyzer {
 
         metrics.push(voteMetric);
 
-        // Further increased delay between votes to avoid nonce conflicts
         if (i < voters.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 500));
         }
 
       } catch (error: any) {
         console.error(`❌ Vote failed for voter ${i} (${voter.address}):`, error);
-        // Continue with next voter
       }
     }
 
@@ -191,27 +194,22 @@ class VotingPerformanceAnalyzer {
       throw new Error("No successful votes to analyze");
     }
 
-    // Calculate gas metrics
     const totalGasUsed = voteMetrics.reduce((sum, m) => sum + m.gasUsed, 0n);
     const averageGasPerVote = totalGasUsed / BigInt(voteMetrics.length);
     const totalCostWei = voteMetrics.reduce((sum, m) => sum + m.totalCostWei, 0n);
 
-    // Calculate time metrics (timestamps are in milliseconds)
     const sortedByTime = voteMetrics.sort((a, b) => a.timestampMs - b.timestampMs);
     const startTime = sortedByTime[0].timestampMs;
     const endTime = sortedByTime[sortedByTime.length - 1].timestampMs;
     const durationMs = endTime - startTime;
 
-    // Calculate block range
     const blockNumbers = voteMetrics.map(m => m.blockNumber);
     const startBlock = Math.min(...blockNumbers);
     const endBlock = Math.max(...blockNumbers);
     const blockCount = endBlock - startBlock + 1;
 
-    // Calculate latency (average time between votes)
     const averageLatencyMs = durationMs / (voteMetrics.length - 1);
 
-    // Calculate throughput (votes per second)
     const throughputVps = durationMs > 0 ? voteMetrics.length / (durationMs / 1000) : Infinity;
 
     return {
@@ -274,7 +272,6 @@ ${results.individualVotes.map((v, i) =>
     console.log(`\n🏭 Starting batched voting with ${voterAddresses.length} voters using ${this.accounts.length} relayers`);
     console.log("=".repeat(70));
 
-    // Use existing election contract or deploy new one
     let electionAddress: string;
     if (existingElectionAddress) {
       electionAddress = existingElectionAddress;
@@ -284,14 +281,11 @@ ${results.individualVotes.map((v, i) =>
       console.log(`✅ Election deployed at: ${electionAddress} (for voting)`);
     }
 
-    // Register voters (already done in main function)
     console.log(`✅ Voters registered: ${voterAddresses.length}`);
 
-    // Execute batched voting
     const batchResults = await this.executeBatchedVoting(electionAddress, voterAddresses);
     console.log(`✅ Completed ${batchResults.transactionMetrics.length} voting transactions`);
 
-    // Calculate comprehensive metrics
     const results = await this.calculateBatchedMetrics(batchResults, totalVoters, this.accounts.length);
 
     return results;
@@ -301,14 +295,13 @@ ${results.individualVotes.map((v, i) =>
     const admin = this.accounts[0];
     const ElectionFactory = await ethers.getContractFactory("Election", admin);
 
-    const candidates = ["Alice Johnson", "Bob Smith", "Charlie Brown"];
     const currentTime = Math.floor(Date.now() / 1000);
     const startTime = currentTime - 60; // Start 1 minute ago (already active)
     const endTime = currentTime + 86400; // End in 24 hours (plenty of time)
 
     console.log(`   Election: Start=${new Date(startTime * 1000).toISOString()}, End=${new Date(endTime * 1000).toISOString()}`);
 
-    const election = await ElectionFactory.deploy(candidates, startTime, endTime);
+    const election = await ElectionFactory.deploy(CANDIDATE_NAMES, startTime, endTime);
     await election.waitForDeployment();
 
     return await election.getAddress();
@@ -321,7 +314,6 @@ ${results.individualVotes.map((v, i) =>
 
     console.log(`📊 Processing ${voterAddresses.length} votes using ${relayerCount} relayers...`);
 
-    // Process votes in parallel using multiple relayers
     const votesPerRelayer = Math.ceil(voterAddresses.length / relayerCount);
     const relayerPromises: Promise<VoteMetrics[]>[] = [];
 
@@ -335,7 +327,6 @@ ${results.individualVotes.map((v, i) =>
       }
     }
 
-    // Wait for all relayers to complete
     const allMetrics = await Promise.all(relayerPromises);
     metrics.push(...allMetrics.flat());
 
@@ -351,7 +342,6 @@ ${results.individualVotes.map((v, i) =>
     const metrics: VoteMetrics[] = [];
     const electionWithRelayer = election.connect(relayer);
 
-    // Process votes in batches of 10 per transaction for better efficiency
     const batchSize = 10;
 
     for (let i = 0; i < voterAddresses.length; i += batchSize) {
@@ -361,9 +351,8 @@ ${results.individualVotes.map((v, i) =>
       console.log(`   Relayer ${relayer.address.slice(0, 6)}: Processing batch ${Math.floor(i/batchSize) + 1} (${batch.length} votes)...`);
 
       try {
-        // Submit votes for this batch
         const votePromises = batch.map(async (voterAddress, idx) => {
-          const candidateId = Math.floor(Math.random() * 3); // Random candidate
+          const candidateId = Math.floor(Math.random() * 20);
           const voterIndex = batchStartIndex + idx;
 
           const tx = await electionWithRelayer.relayerVoteFor(voterAddress, candidateId);
@@ -376,6 +365,7 @@ ${results.individualVotes.map((v, i) =>
           return {
             voterIndex,
             voterAddress,
+            candidateId,
             gasUsed: receipt.gasUsed,
             gasPrice: receipt.gasPrice || 0n,
             totalCostWei: (receipt.gasUsed * (receipt.gasPrice || 0n)) as unknown as bigint,
@@ -386,19 +376,16 @@ ${results.individualVotes.map((v, i) =>
           } as VoteMetrics;
         });
 
-        // Wait for all votes in this batch to complete
         const batchResults = await Promise.all(votePromises);
         const validResults = batchResults.filter(result => result !== null) as VoteMetrics[];
         metrics.push(...validResults);
 
         console.log(`   ✓ Completed ${validResults.length}/${batch.length} votes in batch`);
 
-        // Small delay between batches to avoid overwhelming the network
         await new Promise(resolve => setTimeout(resolve, 200));
 
       } catch (error: any) {
         console.log(`   ❌ Batch failed: ${error.message}`);
-        // Continue with next batch
       }
     }
 
@@ -413,17 +400,14 @@ ${results.individualVotes.map((v, i) =>
     const { transactionMetrics } = batchResults;
 
     if (transactionMetrics.length === 0) {
-      // Return minimal results instead of throwing error
       console.log("⚠️ No successful transactions, returning minimal metrics");
       return this.getMinimalBatchedResults(totalVoters, relayerCount);
     }
 
-    // Calculate gas metrics
     const totalGasUsed = transactionMetrics.reduce((sum, m) => sum + m.gasUsed, 0n);
     const averageGasPerVote = totalGasUsed / BigInt(transactionMetrics.length);
     const totalCostWei = transactionMetrics.reduce((sum, m) => sum + m.totalCostWei, 0n);
 
-    // Group by transaction to calculate transaction metrics
     const txGroups = new Map<string, VoteMetrics[]>();
     transactionMetrics.forEach(metric => {
       if (!txGroups.has(metric.transactionHash)) {
@@ -436,24 +420,20 @@ ${results.individualVotes.map((v, i) =>
     const averageGasPerTransaction = totalGasUsed / BigInt(totalTransactions);
     const batchEfficiency = transactionMetrics.length / totalTransactions; // votes per tx
 
-    // Calculate time metrics (timestamps are in milliseconds)
     const sortedByTime = transactionMetrics.sort((a, b) => a.timestampMs - b.timestampMs);
     const startTime = sortedByTime[0].timestampMs;
     const endTime = sortedByTime[sortedByTime.length - 1].timestampMs;
     const durationMs = endTime - startTime;
 
-    // Calculate throughput
     const averageLatencyMs = durationMs > 0 ? durationMs / (transactionMetrics.length - 1) : 0;
     const throughputVps = durationMs > 0 ? transactionMetrics.length / (durationMs / 1000) : Infinity; // votes per second
     const throughputTps = durationMs > 0 ? totalTransactions / (durationMs / 1000) : Infinity; // transactions per second
 
-    // Calculate block range
     const blockNumbers = transactionMetrics.map(m => m.blockNumber);
     const startBlock = Math.min(...blockNumbers);
     const endBlock = Math.max(...blockNumbers);
     const blockCount = endBlock - startBlock + 1;
 
-    // Calculate relayer utilization
     const activeRelayers = new Set(transactionMetrics.map(m => m.transactionHash.slice(-6))).size;
     const relayerUtilization = (activeRelayers / relayerCount) * 100;
 
@@ -508,7 +488,6 @@ ${results.individualVotes.map((v, i) =>
   static exportResultsToCSV(results: BatchedVotingResults, scenario: any): void {
     const reportDir = path.join(__dirname, '..', 'report');
 
-    // Ensure report directory exists
     if (!fs.existsSync(reportDir)) {
       fs.mkdirSync(reportDir, { recursive: true });
     }
@@ -516,10 +495,8 @@ ${results.individualVotes.map((v, i) =>
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `performance-test-${scenario.voters}voters-${timestamp}.csv`;
 
-    // Prepare CSV data
     const csvData = [];
 
-    // Add summary header
     csvData.push(['Test Scenario', scenario.description]);
     csvData.push(['Total Voters', results.totalVoters.toString()]);
     csvData.push(['Total Votes', results.totalVotes.toString()]);
@@ -545,10 +522,12 @@ ${results.individualVotes.map((v, i) =>
     csvData.push(['Duration (seconds)', (results.timeRange.durationMs / 1000).toFixed(2)]);
     csvData.push(['']);
     csvData.push(['Individual Transaction Metrics']);
-    // CSV headers (accurate naming)
+
     csvData.push([
       "Voter Index",
       "Voter Address",
+      "Candidate ID",
+      "Candidate Name",
       "Gas Used",
       "Effective Gas Price (wei)",
       "Effective Gas Price (gwei)",
@@ -567,6 +546,8 @@ ${results.individualVotes.map((v, i) =>
       csvData.push([
         String(m.voterIndex),
         m.voterAddress,
+        String(m.candidateId),
+        getCandidateName(m.candidateId),
         gasUsed.toString(),
         effectiveGasPrice.toString(),
         ethers.formatUnits(effectiveGasPrice, "gwei"),
@@ -579,12 +560,10 @@ ${results.individualVotes.map((v, i) =>
     });
 
 
-    // Convert to CSV string
     const csvContent = csvData.map(row =>
       row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(',')
     ).join('\n');
 
-    // Write to file
     const filePath = path.join(reportDir, filename);
     fs.writeFileSync(filePath, csvContent, 'utf8');
 
@@ -631,18 +610,15 @@ ${"=".repeat(80)}
 }
 
 async function main() {
-  // Large-scale voting scenarios: Generate many voter addresses, use few funded accounts
   const testScenarios = [
-    { voters: 500, description: "Basic scale test (500 voters)" },
-    { voters: 2000, description: "Large scale test (2k voters)" },
-    { voters: 5000, description: "Massive scale test (5k voters)" },
-    { voters: 10000, description: "Extreme scale test (10k voters)" }
+    { voters: 500000, description: "Basic scale test (500 voters)" },
+    // { voters: 2000, description: "Large scale test (2k voters)" },
+    // { voters: 5000, description: "Massive scale test (5k voters)" },
+    // { voters: 10000, description: "Extreme scale test (10k voters)" }
   ];
 
-  // Setup provider
   const provider = new ethers.JsonRpcProvider(process.env.SEPOLIA_RPC_URL || "http://localhost:8545");
 
-  // Use a consistent Hardhat account that gets reset with the network
   const baseWallet = new ethers.Wallet("0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d", provider);
 
   console.log("🧪 BLOCKCHAIN VOTING SYSTEM - PERFORMANCE ANALYSIS");
@@ -657,14 +633,12 @@ async function main() {
       console.log(`\n🎯 ${scenario.description}: Testing with ${voterCount} voters`);
       console.log(`🔄 Preparing voter addresses and relayer accounts...`);
 
-      // Get Hardhat relayer accounts (only 20 funded accounts needed)
       const allSigners = await ethers.getSigners();
       const relayerAccounts = allSigners.slice(0, 20); // Use all 20 as relayers
 
       console.log(`✅ Using ${relayerAccounts.length} relayer accounts with 10,000 ETH each`);
       console.log(`🔨 Generating ${voterCount} random voter addresses...`);
 
-      // Generate random voter addresses (no funding needed!)
       const voterAddresses: string[] = [];
       for (let i = 0; i < voterCount; i++) {
         const randomWallet = ethers.Wallet.createRandom();
@@ -673,20 +647,17 @@ async function main() {
 
       console.log(`📝 Registering ${voterCount} voters with the contract...`);
 
-      // Deploy election contract first to get address for registration
       const tempAnalyzer = new VotingPerformanceAnalyzer(provider, relayerAccounts);
       const electionAddress = await tempAnalyzer.deployElectionForBatch();
       console.log(`📋 Election contract deployed at: ${electionAddress}`);
 
-      // Register all voters in batches
       const adminAccount = relayerAccounts[0];
       const electionContract = await ethers.getContractAt("Election", electionAddress, adminAccount);
       console.log(`👤 Using admin account: ${adminAccount.address}`);
 
       console.log(`   Election deployed, now registering ${voterAddresses.length} voters...`);
 
-      // Register voters in smaller batches to avoid gas limits
-      const batchSize = 50; // Register 50 voters per transaction
+      const batchSize = 50;
       let registeredCount = 0;
 
       for (let i = 0; i < voterAddresses.length; i += batchSize) {
@@ -718,13 +689,11 @@ async function main() {
           console.log(`   Error details:`, error);
         }
 
-        // Small delay between registration batches
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       console.log(`✅ Registration complete: ${registeredCount} voters registered`);
 
-      // Verify registration with a sample check
       if (voterAddresses.length > 0) {
         try {
           const isRegistered = await electionContract.isRegisteredVoter(voterAddresses[0]);
@@ -736,21 +705,17 @@ async function main() {
 
       console.log(`🚀 Starting batched voting test...`);
 
-      // Wait for network to settle
       console.log("⏳ Waiting for network to settle...");
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Create analyzer with relayer accounts and use the same election contract
       const analyzer = new VotingPerformanceAnalyzer(provider, relayerAccounts);
       console.log(`🏭 Starting batched voting test with ${relayerAccounts.length} relayers using contract ${electionAddress}...`);
       const results = await analyzer.runBatchedVotingTest(voterAddresses, voterCount, electionAddress);
 
       console.log(VotingPerformanceAnalyzer.formatBatchedResults(results, scenario));
 
-      // Export results to CSV
       VotingPerformanceAnalyzer.exportResultsToCSV(results, scenario);
 
-      // Delay between test scenarios to let network settle
       if (voterCount !== testScenarios[testScenarios.length - 1].voters) {
         console.log("⏳ Waiting 10 seconds before next test scenario...");
         await new Promise(resolve => setTimeout(resolve, 10000));
@@ -761,7 +726,6 @@ async function main() {
     }
   }
 
-  // Summary comparison
   if (allResults.length > 1) {
     console.log("\n📈 COMPARATIVE ANALYSIS");
     console.log("=".repeat(60));
@@ -774,7 +738,6 @@ async function main() {
   console.log("\n✅ Performance analysis complete!");
 }
 
-// We recommend this pattern to be able to use async/await everywhere
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
