@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config(); // Load environment variables from .env file
 
 import { ethers } from "hardhat";
-import { ElectionService } from "../src/services/ElectionService";
+import { ElectionService } from "../backend/services/ElectionService";
 
 async function main() {
   console.log("🚀 Quick Start: End-to-End Voting System Setup\n");
