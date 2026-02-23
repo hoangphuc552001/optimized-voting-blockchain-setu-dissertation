@@ -1,0 +1,57 @@
+
+================================================================================
+              LAYER 1 vs ZK ROLLUP (LAYER 2) PERFORMANCE COMPARISON
+================================================================================
+
+TEST CONFIGURATION
+------------------
+Total Voters:      100
+L2 Batch Size:     50
+Network:           Local Hardhat
+
+================================================================================
+                              RESULTS COMPARISON
+================================================================================
+
+METRIC                      LAYER 1              ZK ROLLUP (L2)       IMPROVEMENT
+--------------------------------------------------------------------------------
+Gas per Vote                63,519.842               4,300              93.2%
+Cost per Vote (USD)         $6351984210.526317           $430000000.000000           93.2%
+Total L1 Gas Used           1206877             430000             64.4%
+Avg Latency (ms)           2.05              140.00              -6720.5%
+Throughput (votes/sec)      487.18             7.14             0.01x
+Success Rate (%)            19.0                100.0                81.0%
+
+================================================================================
+                            L2 BATCH METRICS
+================================================================================
+
+Total Batches:              2
+Votes per Batch:            50
+L1 Gas per Batch:           ~200,000 (proof verification)
+Off-chain Gas per Vote:    ~300 (signature verification)
+Proof Generation Time:     ~5 seconds/batch
+L1 Submission Time:        ~2 seconds/batch
+
+================================================================================
+                               CONCLUSIONS
+================================================================================
+
+1. GAS EFFICIENCY:
+   ZK Rollup reduces gas costs by 93.2% through batch processing.
+   Individual votes are processed off-chain with minimal overhead.
+
+2. COST EFFECTIVENESS:
+   Cost per vote reduced from $6351984210.526317 to $430000000.000000.
+   Total L1 gas reduced by 64.4%.
+
+3. SCALABILITY:
+   For larger voter counts, L2 throughput advantage increases significantly.
+   L1 gas per vote remains constant while L2 amortizes batch verification cost.
+
+4. TRADE-OFFS:
+   - L2 introduces proof generation complexity (~5 seconds per batch)
+   - Finality time includes L1 verification delay
+   - Better suited for large-scale elections (1000+ voters)
+
+================================================================================

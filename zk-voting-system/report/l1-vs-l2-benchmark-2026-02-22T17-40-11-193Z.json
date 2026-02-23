@@ -1,0 +1,28 @@
+[
+  {
+    "layer": "L1",
+    "voterCount": 100,
+    "batchSize": 1,
+    "totalGasUsed": "665006",
+    "avgGasPerVote": 6650.06,
+    "totalTimeMs": 55,
+    "avgLatencyMs": 0.55,
+    "votesPerSecond": 1818.181818181818,
+    "costPerVoteUSD": 665006000,
+    "totalCostUSD": 66500600000,
+    "successRate": 100
+  },
+  {
+    "layer": "L2",
+    "voterCount": 100,
+    "batchSize": 50,
+    "totalGasUsed": "430000",
+    "avgGasPerVote": 4300,
+    "totalTimeMs": 14000,
+    "avgLatencyMs": 140,
+    "votesPerSecond": 7.142857142857143,
+    "costPerVoteUSD": 430000000,
+    "totalCostUSD": 43000000000,
+    "successRate": 100
+  }
+]

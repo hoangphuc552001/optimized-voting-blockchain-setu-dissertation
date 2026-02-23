@@ -1,0 +1,77 @@
+
+================================================================================
+        LAYER 1 vs ZK ROLLUP (LAYER 2) PERFORMANCE COMPARISON
+                   100,000 VOTES SIMULATION
+================================================================================
+
+TEST CONFIGURATION
+------------------
+Actual Voters Tested:   20
+Simulated Votes:        100,000
+L2 Batch Size:         100
+Network:               Local Hardhat (simulated L2)
+
+================================================================================
+                           RESULTS COMPARISON
+================================================================================
+
+METRIC                      LAYER 1              ZK ROLLUP (L2)       IMPROVEMENT
+--------------------------------------------------------------------------------
+Votes Processed            100,000              100,000
+Gas per Vote               6,821.3               2,300              66.3%
+Total Gas Used             682,130,000           230,000,000           66.3%
+Est. Cost (USD)*           $68,213,000,000,000          $23,000,000,000,000           66.3%
+Est. Duration             145 seconds           7000 seconds       
+Throughput (votes/sec)     689.655             14.286
+
+* At 50 gwei gas price, $2000/ETH
+
+================================================================================
+                        L2 BATCH METRICS
+================================================================================
+
+Total Batches:              1,000
+Votes per Batch:            100
+L1 Gas per Batch:           200,000 (ZK proof verification)
+Off-chain Gas per Vote:    300 (signature verification)
+
+================================================================================
+                        COST BREAKDOWN
+================================================================================
+
+LAYER 1 (Direct Voting):
+  - 100,000 votes × 6821 gas = 682,130,000 gas
+  - Estimated cost: $68,213,000,000,000
+
+LAYER 2 (ZK Rollup):
+  - 1,000 batches × 200,000 gas = 200,000,000 gas (L1)
+  - 100,000 votes × 300 gas = 30,000,000 gas (off-chain)
+  - Total: 230,000,000 gas
+  - Estimated cost: $23,000,000,000,000
+
+================================================================================
+                           CONCLUSIONS
+================================================================================
+
+GAS SAVINGS: 66.3%
+COST SAVINGS: 66.3%
+
+1. GAS EFFICIENCY:
+   ZK Rollup reduces total gas by 66.3%
+   Key: L1 batch verification (200k gas) amortized across many votes
+
+2. COST ANALYSIS:
+   - L1: $68,213,000,000,000 (at $2000/ETH)
+   - L2: $23,000,000,000,000
+   - Savings: $45,213,000,000,000
+
+3. SCALABILITY:
+   With larger voter counts, L2 efficiency improves further:
+   - 100,000 votes: ~2300 gas/vote
+   - 1,000,000 votes: ~320 gas/vote
+
+4. TRADE-OFFS:
+   - L2 has higher latency due to proof generation (~5 sec/batch)
+   - Better suited for large-scale elections where cost savings matter
+
+================================================================================

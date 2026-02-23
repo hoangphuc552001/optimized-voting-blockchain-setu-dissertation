@@ -1,0 +1,67 @@
+
+================================================================================
+              LAYER 1 vs ZK ROLLUP (LAYER 2) PERFORMANCE COMPARISON
+================================================================================
+
+TEST CONFIGURATION
+------------------
+Total Voters:      100
+L2 Batch Size:     50
+Network:           Local Hardhat
+
+================================================================================
+                              RESULTS COMPARISON
+================================================================================
+
+METRIC                      LAYER 1              ZK ROLLUP (L2)       IMPROVEMENT
+--------------------------------------------------------------------------------
+Votes Cast                 100                100                 
+Gas per Vote                6,650.06               4,300              35.3%
+Total Gas Used              665006             430000             35.3%
+Avg Latency (ms)           0.55              140.00              
+Throughput (votes/sec)      1818.18             7.14             0.00x
+Success Rate (%)            100.0                100.0                
+
+================================================================================
+                            L2 BATCH METRICS
+================================================================================
+
+Total Batches:              2
+Votes per Batch:            50
+L1 Gas per Batch:           200,000 (proof verification)
+Off-chain Gas per Vote:    300 (signature verification)
+
+================================================================================
+                               COST ANALYSIS
+================================================================================
+
+Layer 1 (Direct Voting):
+  - 100 votes × 6650 gas = 665006 gas total
+
+Layer 2 (ZK Rollup):
+  - 2 batches × 200,000 gas = 400,000 gas (L1)
+  - 100 votes × 300 gas = 30,000 gas (off-chain)
+  - Total: 430000 gas
+
+GAS SAVINGS: 35.3%
+
+================================================================================
+                               CONCLUSIONS
+================================================================================
+
+1. GAS EFFICIENCY:
+   ZK Rollup reduces total gas usage by 35.3%
+   Individual votes processed off-chain with minimal overhead
+
+2. COST EFFECTIVENESS:
+   - L1: 665006 gas
+   - L2: 430000 gas
+   - Savings: 35.3%
+
+3. SCALABILITY ADVANTAGE:
+   With larger voter counts, L2 becomes even more efficient:
+   - 1,000 voters: ~10300 gas/vote
+   - 10,000 voters: ~1300 gas/vote
+   - 100,000 voters: ~400 gas/vote
+
+================================================================================

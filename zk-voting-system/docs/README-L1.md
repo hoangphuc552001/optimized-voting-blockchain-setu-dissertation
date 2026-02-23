@@ -456,9 +456,19 @@ npm run performance:analysis:sepolia
 ├── scripts/            # Deployment and management scripts
 │   ├── deploy.ts                 # Contract deployment
 │   ├── manage-election.ts        # Election management utilities
-│   ├── quick-start.ts           # One-click setup script
-│   ├── performance-test.ts      # Basic performance testing
-│   └── performance-analysis.ts  # Advanced dissertation analysis
+│   └── quick-start.ts           # One-click setup script
+├── analysis/           # Performance analysis scripts
+│   ├── comparison/              # L1 vs L2 comparison benchmarks
+│   │   ├── l1-vs-l2-benchmark.ts
+│   │   ├── l1-vs-l2-100k.ts
+│   │   └── l1-vs-l2-1m.ts
+│   ├── l1-metrics/              # L1-only deep analysis
+│   │   ├── l1-detailed-metrics.ts
+│   │   └── l1-load-test.ts
+│   └── visualization/           # Gas visualization tools
+│       ├── benchmark-l2.ts
+│       ├── visualize-gas.ts
+│       └── analyze-gas.ts
 ├── src/                # Backend TypeScript source
 │   ├── server.ts       # Express server
 │   ├── monitor.ts      # Election monitoring service

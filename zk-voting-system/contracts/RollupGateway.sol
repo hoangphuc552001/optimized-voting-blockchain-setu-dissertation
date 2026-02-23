@@ -20,7 +20,7 @@ interface IVerifier {
 /**
  * @title RollupGateway
  * @notice L1 contract that accepts ZK rollup batches and verifies proofs
- * 
+ *
  * This contract serves as the bridge between L2 voting and L1 security.
  * It verifies ZK proofs and stores state root commitments from L2.
  */
@@ -91,10 +91,10 @@ contract RollupGateway is Ownable, Pausable {
         address _verifier,
         bytes32 _verificationKeyHash,
         uint256 _maxBatchSize
-    ) {
+    ) Ownable(msg.sender) {
         require(address(_verifier) != address(0), "Invalid verifier address");
         require(_maxBatchSize > 0 && _maxBatchSize <= 1000, "Invalid batch size");
-        
+
         verifier = IVerifier(_verifier);
         verificationKeyHash = _verificationKeyHash;
         maxBatchSize = _maxBatchSize;
@@ -129,7 +129,7 @@ contract RollupGateway is Ownable, Pausable {
         require(_batchId == batchCount, "Invalid batch ID");
         require(_voteCommitments.length == _nullifiers.length, "Array length mismatch");
         require(_voteCommitments.length == _candidateIds.length, "Array length mismatch");
-        require(_voteCommitments.length <= maxBatchSize, InvalidBatchSize());
+        require(_voteCommitments.length <= maxBatchSize, "Batch size exceeds maximum");
         require(_voteCommitments.length > 0, "Empty batch not allowed");
         
         // Verify election exists
@@ -199,7 +199,7 @@ contract RollupGateway is Ownable, Pausable {
         bytes32 _voterSecret,
         bytes32 _voteCommitment
     ) external whenPaused {
-        require(msg.sender == guardian, GuardianOnly());
+        require(msg.sender == guardian, "Only guardian can call this");
         
         emit EmergencyExitInitiated(_electionId, block.timestamp);
         // In production, implement full emergency exit logic
