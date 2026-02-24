@@ -117,5 +117,5 @@ temp/
 layer1/artifacts/
 layer1/cache/
 layer1/typechain-types/
-zksnark/circom/target/
-zksnark/circuit_js/
+zk-protocols/circom/target/
+zk-protocols/circuit_js/
