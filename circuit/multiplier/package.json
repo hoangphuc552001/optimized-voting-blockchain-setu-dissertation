@@ -1,0 +1,27 @@
+{
+  "name": "zk-voting-demo",
+  "version": "1.0.0",
+  "description": "Zero-Knowledge Voting Demo with Circom 2.0, snarkjs Groth16, and Solidity",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run ../basicvote/scripts/deploy.js",
+    "test": "hardhat test"
+  },
+  "keywords": [
+    "zk-snark",
+    "circom",
+    "snarkjs",
+    "voting",
+    "zero-knowledge"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "circomlib": "^2.0.5"
+  }
+}
