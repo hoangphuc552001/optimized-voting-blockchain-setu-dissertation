@@ -1,2 +1,2 @@
-Verifier: https://sepolia.etherscan.io/address/0xF447FD5c692d981372F31FAA07c06C400A4e27ce
+Verifier: https://sepolia.etherscan.io/address/0xF447FD5c692d981372F31FAA07c06C400A4e27ce,https://sepolia.etherscan.io/address/0x7Bc135F740Bb1C88062cF186D28de17BE1582A92
 BallotBox: https://sepolia.etherscan.io/address/0x6279411C67Ab5b439beFCCa338C2aF28932f62C0
