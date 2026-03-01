@@ -1,0 +1,12 @@
+{
+  "name": "merkletree-demo",
+  "version": "1.0.0",
+  "description": "Merkle Tree Interactive Demo - Learn how Merkle trees work",
+  "main": "merkle.js",
+  "scripts": {
+    "demo": "node merkle.js"
+  },
+  "dependencies": {
+    "crypto-js": "^4.1.1"
+  }
+}
