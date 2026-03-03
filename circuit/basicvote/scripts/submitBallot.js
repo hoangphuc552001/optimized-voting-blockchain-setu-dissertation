@@ -10,25 +10,23 @@ async function main() {
     console.log("Voter:", proofData.voter);
     console.log("Ballot Hash:", ballotHash);
 
-    const ballotBoxAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+    const ballotBoxAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
 
     // Format proof from proof.json
-    // snarkjs public signals order: [ballotHash, merkleRoot, candidate, vote, salt]
-    // The circuit outputs: ballotHash = Poseidon(candidate, vote, salt)
-    // Contract expects: [merkleRoot, candidate, vote, salt, ballotHash]
+    // Contract input (6 elements): [merkleRoot, candidate, vote, salt, nullifierHash, ballotHash]
     const a = proof.a;
     const b = proof.b;
     const c = proof.c;
     
     // The contract input must match the ICs in Verifier.sol:
-    // IC1 = merkleRoot, IC2 = candidate, IC3 = vote, IC4 = salt, IC5 = ballotHash
-    // snarkjs public signals: [ballotHash, merkleRoot, candidate, vote, salt]
+    // IC1 = merkleRoot, IC2 = candidate, IC3 = vote, IC4 = salt, IC5 = nullifierHash, IC6 = ballotHash
     const input = [
         proofData.merkleRoot,                    // IC1 - merkleRoot
-        proofData.candidate.toString(),        // IC2 - candidate  
-        proofData.vote.toString(),             // IC3 - vote
-        proofData.salt,                        // IC4 - salt
-        proofData.ballotHash                   // IC5 - ballotHash
+        proofData.candidate.toString(),          // IC2 - candidate  
+        proofData.vote.toString(),               // IC3 - vote
+        proofData.salt,                          // IC4 - salt
+        proofData.nullifierHash,                 // IC5 - nullifierHash
+        proofData.ballotHash                     // IC6 - ballotHash
     ];
     
     console.log("a:", a);
@@ -44,7 +42,7 @@ async function main() {
 
     console.log("\nSubmitting ballot...");
     try {
-        const tx = await ballotBox.submitBallot(a, b, c, input);
+        const tx = await ballotBox.submitBallot(a, b, c, input, ballotHash);
         console.log("Transaction hash:", tx.hash);
         const receipt = await tx.wait();
         

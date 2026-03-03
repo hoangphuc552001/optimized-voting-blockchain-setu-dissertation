@@ -5,29 +5,32 @@ include "circomlib/circuits/bitify.circom";
 include "circomlib/circuits/switcher.circom";
 
 /*
- * Simple Merkle Tree Verifier for Voting
+ * Zero-Knowledge Voting Circuit with Merkle Tree Verification
  * 
- * This circuit verifies that a voter's commitment (leaf) exists in the Merkle tree
- * without revealing the voter's identity or position in the tree.
+ * This circuit verifies that:
+ * 1. A voter's commitment exists in the Merkle tree (voter eligibility)
+ * 2. The vote is valid (binary vote for valid candidate)
+ * 3. The nullifier is correctly computed from voterSecret + electionId (one-person-one-vote)
+ * 4. The ballotHash is correctly computed from candidate + vote + salt
  *
  * @param numLevels - Depth of the Merkle tree (e.g., 10 for 1024 leaves)
  * @param numCandidates - Number of candidates in the election
  */
 template MerkleTreeVerifier(numLevels, numCandidates) {
-    // ============ VOTER IDENTITY PROOF (Private Inputs) ============
+
+    // ============ PRIVATE INPUTS (Known only to voter) ============
     signal input voterSecret;                    // Voter's secret key
-    signal input pathElements[numLevels];        // Sibling hashes along the path
+    signal input electionId;                      // Election identifier (prevents cross-election voting)
+    signal input pathElements[numLevels];         // Sibling hashes along the Merkle path
     signal input pathIndices[numLevels];         // 0 if left child, 1 if right child
 
     // ============ PUBLIC INPUTS ============
-    signal input merkleRoot;                     // Root of the Merkle tree (stored in contract)
-    signal input candidate;                      // Voted candidate (0 to numCandidates-1)
-    signal input vote;                           // Vote value (1 = for, 0 = against)
-    signal input salt;                           // Random salt for vote obfuscation
-    signal input ballotHash;                     // Hash of (candidate, vote, salt) - public input for nullifier
-
-    // ============ PUBLIC OUTPUTS (None - all outputs are now public inputs) ============
-    // Note: ballotHash is now a public input instead of output
+    signal input merkleRoot;                      // Root of the Merkle tree (stored in contract)
+    signal input candidate;                       // Voted candidate (0 to numCandidates-1)
+    signal input vote;                            // Vote value (1 = for, 0 = against)
+    signal input salt;                            // Random salt for vote obfuscation
+    signal input nullifierHash;                   // Hash of (voterSecret, electionId) - for double-voting prevention
+    signal input ballotHash;                      // Hash of (candidate, vote, salt) - vote commitment
 
     // ============ CONSTRAINT 1: Voter's Commitment Exists in Merkle Tree ============
     // First, compute the leaf from voter's secret
@@ -49,8 +52,6 @@ template MerkleTreeVerifier(numLevels, numCandidates) {
         pathIndices[i] * (1 - pathIndices[i]) === 0;
         
         // Use switcher to order current and sibling based on pathIndex
-        // If pathIndex = 0: left = computedHash[i], right = pathElements[i]
-        // If pathIndex = 1: left = pathElements[i], right = computedHash[i]
         switchers[i] = Switcher();
         switchers[i].sel <== pathIndices[i];
         switchers[i].L <== computedHash[i];
@@ -64,10 +65,10 @@ template MerkleTreeVerifier(numLevels, numCandidates) {
         computedHash[i + 1] <== hashers[i].out;
     }
 
-    // ============ CONSTRAINT 2: Merkle Root Must Match ============
+    // Verify computed root matches the stored Merkle root
     computedHash[numLevels] === merkleRoot;
 
-    // ============ CONSTRAINT 3: Vote Validity ============
+    // ============ CONSTRAINT 2: Vote Validity ============
     // vote must be binary (0 or 1)
     vote * (1 - vote) === 0;
 
@@ -77,18 +78,30 @@ template MerkleTreeVerifier(numLevels, numCandidates) {
     lessThan.in[1] <== numCandidates;
     lessThan.out === 1;
 
-    // ============ CONSTRAINT 4: Generate Ballot Hash (Nullifier) ============
+    // ============ CONSTRAINT 3: Nullifier Generation ============
+    // Nullifier = Poseidon(voterSecret, electionId) - unique per voter per election
+    // This ensures one-person-one-vote and prevents double voting across elections
+    component nullifierHasher = Poseidon(2);
+    nullifierHasher.inputs[0] <== voterSecret;
+    nullifierHasher.inputs[1] <== electionId;
+    
+    // Verify the public nullifierHash matches the computed one
+    nullifierHasher.out === nullifierHash;
+
+    // ============ CONSTRAINT 4: Ballot Hash (Vote Commitment) ============
+    // BallotHash = Poseidon(candidate, vote, salt) - encrypts the vote
+    // This is used as part of the proof and verified against the public input
     component ballotHasher = Poseidon(3);
     ballotHasher.inputs[0] <== candidate;
     ballotHasher.inputs[1] <== vote;
     ballotHasher.inputs[2] <== salt;
     
-    // Verify that the public ballotHash matches the computed one
+    // Verify the public ballotHash matches the computed one
     ballotHasher.out === ballotHash;
 }
 
 /*
  * Main component with 10 levels (1024 voters) and 5 candidates
- * Public inputs: merkleRoot, candidate, vote, salt, ballotHash
+ * Public inputs: merkleRoot, candidate, vote, salt, nullifierHash, ballotHash
  */
-component main {public [merkleRoot, candidate, vote, salt, ballotHash]} = MerkleTreeVerifier(10, 5);
+component main {public [merkleRoot, candidate, vote, salt, nullifierHash, ballotHash]} = MerkleTreeVerifier(10, 5);

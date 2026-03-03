@@ -7,6 +7,9 @@
 # 5. Deploy contracts to local blockchain
 # 6. Generate ZK proof for a voter
 # 7. Submit ballot to blockchain
+# 8. End voting phase
+# 9. Reveal vote
+# 10. Finalize results
 
 param(
     [string]$voterName = "Alice",
@@ -81,6 +84,13 @@ if ($LASTEXITCODE -ne 0) { throw "Failed to deploy contracts" }
 Write-Host "Contracts deployed successfully!" -ForegroundColor Green
 Write-Host ""
 
+# Start voting phase
+Write-Host "[Step 5b] Starting voting phase..." -ForegroundColor Yellow
+npx hardhat run scripts/startVoting.js --network localhost
+if ($LASTEXITCODE -ne 0) { throw "Failed to start voting" }
+Write-Host "Voting phase started!" -ForegroundColor Green
+Write-Host ""
+
 # Step 6: Generate ZK Proof
 Write-Host "[Step 6] Generating ZK Proof for $voterName..." -ForegroundColor Yellow
 
@@ -109,6 +119,33 @@ Write-Host "[Step 7] Submitting ballot to blockchain..." -ForegroundColor Yellow
 npx hardhat run scripts/submitBallot.js --network localhost
 if ($LASTEXITCODE -ne 0) { throw "Failed to submit ballot" }
 
+Write-Host "Ballot submitted successfully!" -ForegroundColor Green
+Write-Host ""
+
+# Step 8: End Voting Phase
+Write-Host "[Step 8] Ending voting phase..." -ForegroundColor Yellow
+
+npx hardhat run scripts/endVoting.js --network localhost
+if ($LASTEXITCODE -ne 0) { throw "Failed to end voting" }
+
+Write-Host "Voting phase ended!" -ForegroundColor Green
+Write-Host ""
+
+# Step 9: Reveal Vote
+Write-Host "[Step 9] Revealing vote..." -ForegroundColor Yellow
+
+npx hardhat run scripts/revealVote.js --network localhost
+if ($LASTEXITCODE -ne 0) { throw "Failed to reveal vote" }
+
+Write-Host "Vote revealed successfully!" -ForegroundColor Green
+Write-Host ""
+
+# Step 10: Finalize Results
+Write-Host "[Step 10] Finalizing results..." -ForegroundColor Yellow
+
+npx hardhat run scripts/finalizeResults.js --network localhost
+if ($LASTEXITCODE -ne 0) { throw "Failed to finalize results" }
+
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
 Write-Host "Voting Flow Completed Successfully!" -ForegroundColor Green
@@ -122,6 +159,7 @@ Write-Host "  - Voter: $voterName"
 Write-Host "  - Candidate: $candidate"
 Write-Host "  - Vote: $vote"
 Write-Host "  - Ballot Hash: $($proofData.ballotHash)"
+Write-Host "  - Nullifier Hash: $($proofData.nullifierHash)"
 Write-Host ""
 
 # Cleanup
