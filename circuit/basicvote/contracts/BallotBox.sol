@@ -7,7 +7,7 @@ interface IVerifier {
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[1] memory input
+        uint256[5] memory input
     ) external view returns (bool);
 }
 
@@ -15,67 +15,106 @@ interface IVerifier {
 contract BallotBox {
     IVerifier public verifier;
     
-    event BallotAccepted(uint256 indexed ballotHash);
+    // Merkle root of eligible voters - stored upon deployment
+    uint256 public merkleRoot;
     
-    event DuplicateBallotRejected(uint256 indexed ballotHash);
+    // Election identifier to prevent cross-election voting
+    uint256 public electionId;
+    
+    // Track used nullifiers to prevent double voting
+    mapping(uint256 => bool) public nullifierHashes;
+    
+    event BallotAccepted(uint256 indexed nullifierHash, uint256 indexed ballotHash);
+    
+    event DuplicateBallotRejected(uint256 indexed nullifierHash);
 
-    mapping(uint256 => bool) public ballotHashes;
+    event MerkleRootSet(uint256 indexed merkleRoot);
     
     uint256 public ballotCount;
     
     uint256 public constant NUM_CANDIDATES = 5;
     
 
-    constructor(address _verifier) {
+    constructor(address _verifier, uint256 _merkleRoot, uint256 _electionId) {
         require(_verifier != address(0), "Verifier address cannot be zero");
         verifier = IVerifier(_verifier);
+        merkleRoot = _merkleRoot;
+        electionId = _electionId;
         ballotCount = 0;
+    }
+
+    function setMerkleRoot(uint256 _merkleRoot) public {
+        merkleRoot = _merkleRoot;
+        emit MerkleRootSet(_merkleRoot);
     }
 
     function submitBallot(
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[1] memory input
+        uint256[5] memory input
     ) public {
-        uint256 ballotHash = input[0];
+        // Input array format from circuit: [merkleRoot, candidate, vote, salt, ballotHash]
+        uint256 inputMerkleRoot = input[0];
+        uint256 candidate = input[1];
+        uint256 vote = input[2];
+        uint256 salt = input[3];
+        uint256 ballotHash = input[4];
+        
+        // Use ballotHash as nullifier for double-voting prevention
+        uint256 nullifierHash = ballotHash;
 
+        // Verify the Merkle root matches
+        require(inputMerkleRoot == merkleRoot, "Invalid Merkle root");
+
+        // Verify the ZK proof
         require(
             verifier.verifyProof(a, b, c, input),
             "Invalid ZK proof"
         );
 
-        if (ballotHashes[ballotHash]) {
-            emit DuplicateBallotRejected(ballotHash);
-            revert("Ballot already submitted (exact duplicate)");
+        // Check for double voting (nullifier reuse)
+        if (nullifierHashes[nullifierHash]) {
+            emit DuplicateBallotRejected(nullifierHash);
+            revert("Ballot already submitted (nullifier already used)");
         }
         
-        ballotHashes[ballotHash] = true;
+        // Record the nullifier to prevent double voting
+        nullifierHashes[nullifierHash] = true;
         ballotCount++;
         
-        emit BallotAccepted(ballotHash);
+        emit BallotAccepted(nullifierHash, ballotHash);
     }
 
     function submitBallotAllowDuplicates(
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
-        uint256[1] memory input
+        uint256[5] memory input
     ) public {
+        // Input array format: [merkleRoot, nullifierHash, ballotHash, electionId, ballotHashForVerifier]
+        uint256 inputMerkleRoot = input[0];
+        uint256 ballotHash = input[2];
+        uint256 inputElectionId = input[3];
+
+        // Verify the Merkle root matches
+        require(inputMerkleRoot == merkleRoot, "Invalid Merkle root");
+
+        // Verify the election ID matches
+        require(inputElectionId == electionId, "Invalid election ID");
+        
         require(
             verifier.verifyProof(a, b, c, input),
             "Invalid ZK proof"
         );
         
-        uint256 ballotHash = input[0];
-        
         ballotCount++;
         
-        emit BallotAccepted(ballotHash);
+        emit BallotAccepted(input[1], ballotHash);
     }
 
-    function hasSubmitted(uint256 ballotHash) public view returns (bool) {
-        return ballotHashes[ballotHash];
+    function hasSubmitted(uint256 nullifierHash) public view returns (bool) {
+        return nullifierHashes[nullifierHash];
     }
 
     function getVerifierAddress() public view returns (address) {

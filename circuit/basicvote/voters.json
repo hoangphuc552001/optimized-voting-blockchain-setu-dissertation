@@ -1,0 +1,14 @@
+{
+  "electionId": 1,
+  "description": "List of eligible voters for the election",
+  "voters": [
+    { "id": 1, "name": "Alice", "secret": "12345678901234567890123456789012" },
+    { "id": 2, "name": "Bob", "secret": "98765432109876543210987654321098" },
+    { "id": 3, "name": "Charlie", "secret": "11111111111111111111111111111111" },
+    { "id": 4, "name": "Diana", "secret": "22222222222222222222222222222222" },
+    { "id": 5, "name": "Eve", "secret": "33333333333333333333333333333333" },
+    { "id": 6, "name": "Frank", "secret": "44444444444444444444444444444444" },
+    { "id": 7, "name": "Grace", "secret": "55555555555555555555555555555555" },
+    { "id": 8, "name": "Henry", "secret": "66666666666666666666666666666666" }
+  ]
+}
