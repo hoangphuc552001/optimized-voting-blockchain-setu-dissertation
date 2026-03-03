@@ -1,7 +1,7 @@
 const {ethers} = require("hardhat");
 
 async function main() {
-    const ballotBoxAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+    const ballotBoxAddress = "0x68B1D87F95878fE05B998F19b66F4baba5De1aed";
 
     const BallotBox = await ethers.getContractFactory("BallotBox");
     const ballotBox = BallotBox.attach(ballotBoxAddress);

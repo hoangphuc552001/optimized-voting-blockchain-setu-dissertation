@@ -10,7 +10,7 @@ async function main() {
     console.log("Voter:", proofData.voter);
     console.log("Ballot Hash:", ballotHash);
 
-    const ballotBoxAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+    const ballotBoxAddress = "0x68B1D87F95878fE05B998F19b66F4baba5De1aed";
 
     // Format proof from proof.json
     // Contract input (6 elements): [merkleRoot, candidate, vote, salt, nullifierHash, ballotHash]
