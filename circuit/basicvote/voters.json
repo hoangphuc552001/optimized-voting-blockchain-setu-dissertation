@@ -1,6 +1,6 @@
 {
   "electionId": 1,
-  "description": "List of eligible voters for the election",
+  "description": "We have a valid list of eligible voters for the election",
   "voters": [
     { "id": 1, "name": "Alice", "secret": "12345678901234567890123456789012" },
     { "id": 2, "name": "Bob", "secret": "98765432109876543210987654321098" },
