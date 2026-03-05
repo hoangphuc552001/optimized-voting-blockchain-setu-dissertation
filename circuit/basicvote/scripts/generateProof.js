@@ -6,22 +6,24 @@ async function generateProof() {
     const poseidon = await buildPoseidon();
     const F = poseidon.F;
 
-    // Read Merkle proofs from file
+    // Read Merkle proofs from file (contains pathElements, pathIndices, leaf - NO secret)
     const proofsData = JSON.parse(fs.readFileSync("./merkleProofs.json", "utf8"));
-    const votersData = JSON.parse(fs.readFileSync("./voters.json", "utf8"));
+    // Read voter secrets from private file (each voter has their own)
+    const voterSecretsData = JSON.parse(fs.readFileSync("./voter-secrets.json", "utf8"));
     const merkleRoot = BigInt(proofsData.merkleRoot);
     const electionId = BigInt(proofsData.electionId);
 
     // Pick a voter (Alice - voterId 1)
     const voter = proofsData.proofs[0]; // Alice - index 0
-    const voterData = votersData.voters[0]; // Get original secret from voters.json
-    const voterSecret = BigInt("0x" + voterData.secret);
+    const voterSecretData = voterSecretsData.voters[0]; // Get secret from private file
+    const voterSecret = BigInt("0x" + voterSecretData.secret);
     const pathElements = voter.pathElements;
     const pathIndices = voter.pathIndices;
 
     console.log("\n=== Generating Proof for Voter ===");
     console.log("Voter:", voter.name);
     console.log("Voter ID:", voter.voterId);
+    console.log("Note: Secret loaded from voter-secrets.json (simulates voter's private file)");
 
     // Vote parameters
     const candidate = 2;  // Vote for candidate 2
@@ -108,7 +110,7 @@ async function generateProof() {
     const proofData = {
         voter: voter.name,
         voterId: voter.voterId,
-        voterSecret: voterData.secret,
+        voterSecret: voterSecretData.secret,
         electionId: electionId.toString(),
         candidate,
         vote,

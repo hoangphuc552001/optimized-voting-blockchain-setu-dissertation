@@ -1,14 +1,46 @@
 {
+  "description": "Eligible voters list - ADMIN SEES THIS (identity + leaf only, NO secret)",
   "electionId": 1,
-  "description": "We have a valid list of eligible voters for the election",
   "voters": [
-    { "id": 1, "name": "Alice", "secret": "12345678901234567890123456789012" },
-    { "id": 2, "name": "Bob", "secret": "98765432109876543210987654321098" },
-    { "id": 3, "name": "Charlie", "secret": "11111111111111111111111111111111" },
-    { "id": 4, "name": "Diana", "secret": "22222222222222222222222222222222" },
-    { "id": 5, "name": "Eve", "secret": "33333333333333333333333333333333" },
-    { "id": 6, "name": "Frank", "secret": "44444444444444444444444444444444" },
-    { "id": 7, "name": "Grace", "secret": "55555555555555555555555555555555" },
-    { "id": 8, "name": "Henry", "secret": "66666666666666666666666666666666" }
+    {
+      "id": 1,
+      "name": "Voter 1",
+      "leaf": "0x26912aecf99cfbb48a1f7385e8babc14ee377da7d92a63b62287430edc093925"
+    },
+    {
+      "id": 2,
+      "name": "Voter 2",
+      "leaf": "0x1fb1a6484503dd9fc68ed4d06d291473c27772e9a94fdbb91a3c65a5c02b4de1"
+    },
+    {
+      "id": 3,
+      "name": "Voter 3",
+      "leaf": "0x0db07e24db2996e1eed59799eb2073c013ff762e29a713a40e97af27d6ab6a52"
+    },
+    {
+      "id": 4,
+      "name": "Voter 4",
+      "leaf": "0x24671f0c72184c81b79646bb11eb3a80c946361424af1a40b83163fb0c9f3b53"
+    },
+    {
+      "id": 5,
+      "name": "Voter 5",
+      "leaf": "0x03e29dda3e9bd11a93cf66022f906da7591ee192b758e6313cf1d03076bc0049"
+    },
+    {
+      "id": 6,
+      "name": "Voter 6",
+      "leaf": "0x068c9b46818e4802fe3333239f0cbb969c3719bd7417ce48e8ef3191910776c0"
+    },
+    {
+      "id": 7,
+      "name": "Voter 7",
+      "leaf": "0x2e82d7a662314faa91c1926731f6e35800606b7727a8e068ca319b56619848d3"
+    },
+    {
+      "id": 8,
+      "name": "Voter 8",
+      "leaf": "0x032c72884cdcef2a26cb6e50eead8fd64e191845b58efa14e6302cc68a180e40"
+    }
   ]
 }

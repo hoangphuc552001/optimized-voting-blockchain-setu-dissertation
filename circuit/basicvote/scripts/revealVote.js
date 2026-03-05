@@ -4,7 +4,7 @@ const fs = require("fs");
 async function main() {
     const proofData = JSON.parse(fs.readFileSync("./proof.json", "utf8"));
     
-    const ballotBoxAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+    const ballotBoxAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
     const BallotBox = await ethers.getContractFactory("BallotBox");
     const ballotBox = BallotBox.attach(ballotBoxAddress);

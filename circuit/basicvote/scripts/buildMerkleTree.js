@@ -5,13 +5,14 @@ async function buildMerkleTree() {
     const poseidon = await buildPoseidon();
     const F = poseidon.F;
 
-    // Read voters from file
+    // Read voters from file (now contains leaf hashes, not secrets)
     const votersData = JSON.parse(fs.readFileSync("./voters.json", "utf8"));
     const voters = votersData.voters;
     const electionId = votersData.electionId;
 
     console.log(`\n=== Building Merkle Tree for Election ${electionId} ===`);
     console.log(`Number of voters: ${voters.length}`);
+    console.log(`Note: Using public leaf hashes (admin never sees secrets)`);
 
     // Use circuit's expected depth (10 levels = 1024 leaves)
     const levels = 10;
@@ -20,10 +21,12 @@ async function buildMerkleTree() {
     console.log(`Merkle tree depth: ${levels}`);
     console.log(`Number of leaf slots: ${numLeaves}`);
 
-    // Step 1: Generate leaves from voter secrets
+    // Step 1: Parse leaf hashes from voter data (already computed by voters)
+    // Each voter already computed their leaf = Poseidon(secret) locally
     const leaves = voters.map(voter => {
-        const leaf = F.toObject(poseidon([BigInt("0x" + voter.secret)]));
-        return { id: voter.id, name: voter.name, secret: voter.secret, leaf };
+        // Parse the leaf from hex string
+        const leaf = BigInt(voter.leaf);
+        return { id: voter.id, name: voter.name, leaf: leaf };
     });
 
     console.log("\n=== Voter Commitments (Leaves) ===");
@@ -82,7 +85,6 @@ async function buildMerkleTree() {
         proofs.push({
             voterId: voter.id,
             name: voter.name,
-            secret: voter.secret,
             leaf: voter.leaf,
             pathElements: pathElements.map(x => x.toString()),
             pathIndices: pathIndices
@@ -93,7 +95,6 @@ async function buildMerkleTree() {
     const proofsJSON = proofs.map(p => ({
         voterId: p.voterId,
         name: p.name,
-        secret: p.secret,
         leaf: p.leaf.toString(),
         pathElements: p.pathElements.map(x => x.toString()),
         pathIndices: p.pathIndices
