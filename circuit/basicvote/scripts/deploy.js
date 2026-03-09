@@ -1,5 +1,6 @@
 const {ethers} = require("hardhat");
 const fs = require("fs");
+const path = require("path");
 
 async function main() {
     const [deployer] = await ethers.getSigners();
@@ -42,9 +43,23 @@ async function main() {
     console.log("- Election ID:", electionId);
     console.log("- Merkle Root:", merkleRoot.toString());
     console.log("- Merkle Root (Hex):", proofsData.merkleRootHex);
-    console.log("\nIMPORTANT: Update submitBallot.js with:");
-    console.log(`  const ballotBoxAddress = "${ballotBoxAddress}";`);
-    console.log(`  const verifierAddress = "${verifierAddress}";`);
+
+    // Save addresses to file for other scripts
+    const network = hre.network.name;
+    const addresses = {
+        network: network,
+        verifier: verifierAddress,
+        ballotBox: ballotBoxAddress,
+        electionId: electionId,
+        merkleRoot: merkleRoot.toString(),
+        merkleRootHex: proofsData.merkleRootHex,
+        deployer: deployer.address,
+        timestamp: new Date().toISOString()
+    };
+
+    const addressesFile = `./${network}-addresses.json`;
+    fs.writeFileSync(addressesFile, JSON.stringify(addresses, null, 2));
+    console.log(`\nAddresses saved to: ${addressesFile}`);
 }
 
 main()

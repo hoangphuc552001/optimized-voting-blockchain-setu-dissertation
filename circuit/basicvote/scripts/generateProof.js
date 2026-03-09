@@ -26,7 +26,7 @@ async function generateProof() {
     console.log("Note: Secret loaded from voter-secrets.json (simulates voter's private file)");
 
     // Vote parameters
-    const candidate = 2;  // Vote for candidate 2
+    const candidate = 1;  // Vote for candidate 2
     const vote = 1;       // Vote = 1 (approve)
     
     // Generate a random salt for the vote
