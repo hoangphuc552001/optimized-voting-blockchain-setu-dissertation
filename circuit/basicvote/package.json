@@ -1,15 +1,22 @@
 {
   "name": "zk-voting-demo",
-  "version": "1.0.0",
-  "description": "Zero-Knowledge Voting Demo with Circom 2.0, snarkjs Groth16, and Solidity",
+  "version": "2.0.0",
+  "description": "Zero-Knowledge Voting System with ZK Rollup Batching",
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
     "deploy": "hardhat run scripts/deploy.js",
-    "test": "hardhat test"
+    "deploy:rollup": "hardhat run scripts/deployRollup.js",
+    "deploy:rollup:local": "hardhat run scripts/deployRollup.js --network localhost",
+    "test": "hardhat test",
+    "test:rollup": "hardhat test test/VotingRollup.test.js",
+    "generate:batch": "node scripts/generateBatchInput.js",
+    "operator": "node operator/index.js",
+    "node": "hardhat node"
   },
   "keywords": [
     "zk-snark",
+    "zk-rollup",
     "circom",
     "snarkjs",
     "voting",
@@ -23,6 +30,10 @@
   },
   "dependencies": {
     "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "snarkjs": "^0.7.6"
   }
 }

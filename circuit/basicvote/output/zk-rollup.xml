@@ -1,0 +1,314 @@
+<mxfile host="app.diagrams.net" modified="2026-03-14T00:00:00.000Z" agent="Claude" version="21.0.0">
+  <diagram name="ZK Rollup Optimized Flow" id="zk-rollup-flow">
+    <mxGraphModel dx="2400" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="2000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="ZK Rollup Voting System - Optimized Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="800" y="20" width="600" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 1: SETUP ==================== -->
+        <mxCell id="phase1_box" value="PHASE 1: SETUP (Before Election)" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="300" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Admin Setup -->
+        <mxCell id="admin_setup" value="Admin Setup&#xa;- Define election parameters&#xa;- Create voter list&#xa;- Set candidates (4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="80" y="130" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Voter Tree -->
+        <mxCell id="voter_tree" value="Voter Merkle Tree&#xa;voterLevels=10&#xa;1024 voters&#xa;&#xa;leaf = Poseidon(secret)&#xa;root = voterMerkleRoot" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="80" y="240" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- State Tree -->
+        <mxCell id="state_tree" value="State Merkle Tree&#xa;stateLevels=5&#xa;32 leaves&#xa;&#xa;leaf = Poseidon(votes)&#xa;root = stateRoot" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="280" y="240" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Deploy Contract -->
+        <mxCell id="deploy" value="Deploy Smart Contract&#xa;&#xa;VotingRollup.sol&#xa;+ BatchVerifier.sol" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="180" y="370" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows Phase 1 -->
+        <mxCell id="arr1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="admin_setup" target="voter_tree">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="admin_setup" target="state_tree">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="voter_tree" target="deploy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="state_tree" target="deploy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 2: REGISTRATION ==================== -->
+        <mxCell id="phase2_box" value="PHASE 2: VOTER REGISTRATION" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="500" y="80" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Voter receives secret -->
+        <mxCell id="voter_secret" value="Voter Receives&#xa;Secret Credential&#xa;&#xa;Only voter knows&#xa;their secret" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="130" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Publish root -->
+        <mxCell id="publish_root" value="Publish&#xa;voterMerkleRoot&#xa;on-chain" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="240" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="voter_secret" target="publish_root">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 3: VOTING ==================== -->
+        <mxCell id="phase3_box" value="PHASE 3: VOTING (Voter Side)" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="500" y="330" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Voter prepares vote -->
+        <mxCell id="prepare_vote" value="1. Voter Prepares Vote&#xa;&#xa;- voterSecret&#xa;- candidate: 0&#xa;- vote: 1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="520" y="380" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Compute hashes -->
+        <mxCell id="compute_hashes" value="2. Compute Hashes&#xa;&#xa;nullifierHash =&#xa;Poseidon(secret, electionId)&#xa;&#xa;ballotHash =&#xa;Poseidon(candidate, vote, salt)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="520" y="470" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Submit to operator -->
+        <mxCell id="submit_operator" value="3. Submit to Operator&#xa;(NOT on-chain yet)&#xa;&#xa;{nullifierHash, ballotHash,&#xa;candidate, voterIndex}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="540" y="590" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="prepare_vote" target="compute_hashes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="compute_hashes" target="submit_operator">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 4: MEMPOOL ==================== -->
+        <mxCell id="phase4_box" value="PHASE 4: OPERATOR MEMPOOL" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="840" y="80" width="260" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Mempool receive -->
+        <mxCell id="mempool" value="Mempool&#xa;&#xa;Collect votes&#xa;Check duplicates&#xa;&#xa;nullifierHash → used?" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="880" y="130" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="submit_operator" target="mempool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 5: BATCH PROCESSING ==================== -->
+        <mxCell id="phase5_box" value="PHASE 5: BATCH PROCESSING" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="840" y="240" width="260" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Trigger batch -->
+        <mxCell id="trigger_batch" value="Trigger Batch&#xa;&#xa;batchSize = 4&#xa;&#xa;(4 votes ready OR&#xa;timer expires)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="860" y="290" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Assemble batch -->
+        <mxCell id="assemble_batch" value="Assemble Batch&#xa;&#xa;- Get preStateRoot&#xa;- For each vote:&#xa;  • Get voterMerkleProof&#xa;  • Get stateMerkleProof&#xa;  • Calc new vote count&#xa;- Pad with No-Ops" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="860" y="390" width="180" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Generate inputs -->
+        <mxCell id="generate_inputs" value="Generate&#xa;Circuit Inputs&#xa;&#xa;PUBLIC:&#xa;preStateRoot&#xa;postStateRoot&#xa;batchNullifierHash&#xa;&#xa;PRIVATE:&#xa;voterSecrets&#xa;votes&#xa;proofs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="880" y="530" width="140" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="mempool" target="trigger_batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="trigger_batch" target="assemble_batch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="assemble_batch" target="generate_inputs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 6: ZK PROOF ==================== -->
+        <mxCell id="phase6_box" value="PHASE 6: ZK PROOF GENERATION" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="1100" y="80" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Run circuit -->
+        <mxCell id="run_circuit" value="Run ZK Circuit&#xa;&#xa;BatchVoteRollup&#xa;(4, 10, 5, 5)&#xa;&#xa;batchSize=4&#xa;voterLevels=10&#xa;stateLevels=5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1160" y="130" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Verify voter -->
+        <mxCell id="verify_voter" value="Verify Voter&#xa;Eligibility&#xa;&#xa;VoterMerkleProof&#xa;&#xa;Poseidon(secret)&#xa;→ leaf → root&#xa;&#xa;root == voterMerkleRoot" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1100" y="260" width="160" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- State transition -->
+        <mxCell id="state_trans" value="State Transition&#xa;(KEY STEP!)&#xa;&#xa;1. Verify old count&#xa;   MerkleProof(oldValue)&#xa;   == preStateRoot&#xa;&#xa;2. Compute new count&#xa;   newValue = oldValue + vote&#xa;&#xa;3. Chain roots" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1290" y="260" width="180" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Nullifier check -->
+        <mxCell id="nullifier_check" value="Verify Nullifiers&#xa;&#xa;- All unique (no double-vote)&#xa;- Batch commitment:&#xa;  Poseidon(nh1,nh2,nh3,nh4)&#xa;  == batchNullifierHash" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1160" y="390" width="180" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Generate proof -->
+        <mxCell id="generate_proof" value="Generate Proof&#xa;&#xa;Groth16&#xa;&#xa;π = (π_a, π_b, π_c)&#xa;&#xa;Public Signals:&#xa;[preStateRoot, postStateRoot,&#xa;batchNullifierHash, voterMerkleRoot]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="500" width="180" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="generate_inputs" target="run_circuit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="run_circuit" target="verify_voter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="run_circuit" target="state_trans">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="run_circuit" target="nullifier_check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="verify_voter" target="generate_proof">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="state_trans" target="generate_proof">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="nullifier_check" target="generate_proof">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 7: ON-CHAIN SUBMISSION ==================== -->
+        <mxCell id="phase7_box" value="PHASE 7: ON-CHAIN SUBMISSION" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="1100" y="640" width="280" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Call contract -->
+        <mxCell id="call_contract" value="Call Smart Contract&#xa;&#xa;submitBatchProof(&#xa;  proof,&#xa;  publicInputs&#xa;)&#xa;&#xa;On-chain" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1160" y="690" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Verify proof -->
+        <mxCell id="verify_onchain" value="Verify Proof&#xa;On-Chain&#xa;&#xa;1. BatchVerifier&#xa;   verifies ZK proof&#xa;&#xa;2. Check storedRoot&#xa;   == preStateRoot&#xa;&#xa;3. Check nullifier&#xa;   not used" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1160" y="800" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Update state -->
+        <mxCell id="update_state" value="Update State&#xa;&#xa;If valid:&#xa;- storedRoot = postStateRoot&#xa;- Add to nullifierSet&#xa;- Add batchNullifierHash&#xa;&#xa;Emit: BatchProcessed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1180" y="920" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="arr19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="generate_proof" target="call_contract">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="call_contract" target="verify_onchain">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arr21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="verify_onchain" target="update_state">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== PHASE 8: RESULT ==================== -->
+        <mxCell id="phase8_box" value="PHASE 8: FINAL RESULT" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=16" vertex="1" parent="1">
+          <mxGeometry x="1500" y="80" width="220" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Election complete -->
+        <mxCell id="election_complete" value="Election Complete&#xa;&#xa;- Final stateRoot stored&#xa;- Vote counts updated&#xa;- Anyone can verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1520" y="130" width="160" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow from phase 7 -->
+        <mxCell id="arr22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="update_state" target="election_complete">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1260" y="1030" />
+              <mxPoint x="1260" y="1050" />
+              <mxPoint x="1600" y="1050" />
+              <mxPoint x="1600" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ==================== LEGEND ==================== -->
+        <mxCell id="legend_box" value="LEGEND" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=14" vertex="1" parent="1">
+          <mxGeometry x="40" y="480" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="leg1" value="Admin/Setup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="525" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="Voter/Off-chain" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="565" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="Operator/Mempool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="605" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="ZK Circuit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="645" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5" value="Smart Contract" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="685" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== KEY CONCEPTS BOX ==================== -->
+        <mxCell id="concepts_box" value="KEY CONCEPTS" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=14" vertex="1" parent="1">
+          <mxGeometry x="200" y="480" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="concept1" value="Voter Merkle Tree&#xa;Prove voter eligibility&#xa;(root published on-chain)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="200" y="520" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="concept2" value="State Merkle Tree&#xa;Track vote counts&#xa;(root updates per batch)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="200" y="590" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="concept3" value="Nullifier&#xa;Prevents double-voting&#xa;(stored on-chain)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="200" y="660" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="concept4" value="State Transition&#xa;Verify old → Compute new&#xa;Chain intermediate roots" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="380" y="520" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="concept5" value="ZK Proof&#xa;Prove constraints&#xa;without revealing data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="380" y="590" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="concept6" value="Batch Nullifier&#xa;Bind all nullifiers&#xa;Reduce on-chain storage" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="380" y="660" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ==================== DATA FLOW ==================== -->
+        <mxCell id="data_flow_box" value="DATA FLOW" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=1;fontSize=14" vertex="1" parent="1">
+          <mxGeometry x="1100" y="1050" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Deploy arrow -->
+        <mxCell id="df1" value="Deploy: voterMerkleRoot + initialStateRoot → SC" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="1100" y="1090" width="280" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Vote submission -->
+        <mxCell id="df2" value="Voter → Operator: {nullifierHash, ballotHash, candidate}" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="1100" y="1125" width="280" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Proof submission -->
+        <mxCell id="df3" value="Operator → Blockchain: proof + [preStateRoot, postStateRoot, batchNullifierHash, voterMerkleRoot]" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="1100" y="1160" width="280" height="25" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
