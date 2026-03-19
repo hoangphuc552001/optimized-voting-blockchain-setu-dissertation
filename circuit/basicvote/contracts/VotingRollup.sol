@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 interface IBatchVerifier {
     function verifyProof(
-        uint256[2] memory a,
-        uint256[2][2] memory b,
-        uint256[2] memory c,
-        uint256[4] memory input
+        uint256[2] calldata a,
+        uint256[2][2] calldata b,
+        uint256[2] calldata c,
+        uint256[4] calldata input
     ) external view returns (bool);
 }
 

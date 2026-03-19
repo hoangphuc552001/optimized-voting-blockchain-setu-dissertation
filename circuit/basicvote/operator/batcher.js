@@ -1,6 +1,6 @@
 const { buildPoseidon } = require("circomlibjs");
 
-const BATCH_SIZE = 4;
+const BATCH_SIZE = 16;
 const NUM_CANDIDATES = 5;
 
 class Batcher {

@@ -20,7 +20,7 @@ async function registerVoters() {
     const F = poseidon.F;
     
     const electionId = 1;
-    const numVoters = 8;
+    const numVoters = 16;
     
     console.log("\n=== VOTER REGISTRATION FLOW (Updated) ===");
     console.log("This simulates each voter generating their own secret locally");

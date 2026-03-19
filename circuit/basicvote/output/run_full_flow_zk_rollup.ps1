@@ -12,13 +12,13 @@ node scripts/buildMerkleTree.js
 # Step 3: Compile batch rollup circuit
 circom circuits/BatchVote.circom --r1cs --wasm --sym -o build -l node_modules
 
-# Step 4: Powers of Tau setup (pot16 = 2^16 = ~65K constraints, sufficient for batch circuit with 52K constraints)
-snarkjs powersoftau new bn128 16 build/pot16_0000.ptau -v
-snarkjs powersoftau contribute build/pot16_0000.ptau build/pot16_0001.ptau --name="Batch contribution" -v -e="batch random entropy"
-snarkjs powersoftau prepare phase2 build/pot16_0001.ptau build/pot16_final.ptau -v
+# Step 4: Powers of Tau setup
+snarkjs powersoftau new bn128 18 build/pot18_0000.ptau -v
+snarkjs powersoftau contribute build/pot18_0000.ptau build/pot18_0001.ptau --name="First contribution" -v -e="random entropy"
+snarkjs powersoftau prepare phase2 build/pot18_0001.ptau build/pot18_final.ptau -v
 
 # Step 5: Groth16 setup
-snarkjs groth16 setup build/BatchVote.r1cs build/pot16_final.ptau build/batch_0000.zkey
+snarkjs groth16 setup build/BatchVote.r1cs build/pot18_final.ptau build/batch_0000.zkey
 snarkjs zkey contribute build/batch_0000.zkey build/batch_0001.zkey --name="Batch Contributor 1" -v -e="batch more random entropy"
 snarkjs zkey export verificationkey build/batch_0001.zkey build/batch_verification_key.json
 

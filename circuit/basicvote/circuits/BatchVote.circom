@@ -155,4 +155,4 @@ template BatchVoteRollup(batchSize, voterLevels, stateLevels, numCandidates) {
 }
 
 component main {public [preStateRoot, postStateRoot, batchNullifierHash, voterMerkleRoot]}
-    = BatchVoteRollup(4, 10, 5, 5);
+    = BatchVoteRollup(16, 10, 5, 5);

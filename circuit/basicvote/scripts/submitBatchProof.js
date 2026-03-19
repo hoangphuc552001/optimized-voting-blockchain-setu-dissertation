@@ -45,8 +45,8 @@ async function main() {
         [b0[1][2], b0[1][3]]
     ];
     const bCorrect = [
-        [proof.pi_b[0][0], proof.pi_b[0][1]],
-        [proof.pi_b[1][0], proof.pi_b[1][1]]
+        [proof.pi_b[0][1], proof.pi_b[0][0]],
+        [proof.pi_b[1][1], proof.pi_b[1][0]]
     ];
     const c = proof.pi_c.slice(0, 2);
 

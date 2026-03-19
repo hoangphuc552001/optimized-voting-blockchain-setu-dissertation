@@ -12,13 +12,13 @@ async function generateBatchInput() {
 
     const voterMerkleRoot = BigInt(proofsData.merkleRoot);
     const electionId = BigInt(proofsData.electionId);
-    const batchSize = 100;
+    const batchSize = 16;
     const stateLevels = 5;
     const numStateLeaves = 2 ** stateLevels;
 
     console.log("=== Generating Batch Input ===");
     console.log("Batch size:", batchSize);
-    console.log("Using voters 1-4 from merkleProofs.json\n");
+    console.log("Using voters 1-16 from merkleProofs.json\n");
 
     const stateLeaves = new Array(numStateLeaves).fill(0n);
 
@@ -75,6 +75,18 @@ async function generateBatchInput() {
         { candidate: 0, vote: 1 },
         { candidate: 1, vote: 1 },
         { candidate: 2, vote: 1 },
+        { candidate: 3, vote: 1 },
+        { candidate: 4, vote: 1 },
+        { candidate: 0, vote: 1 },
+        { candidate: 1, vote: 1 },
+        { candidate: 2, vote: 1 },
+        { candidate: 3, vote: 1 },
+        { candidate: 4, vote: 1 },
+        { candidate: 0, vote: 1 },
+        { candidate: 1, vote: 1 },
+        { candidate: 2, vote: 1 },
+        { candidate: 3, vote: 1 },
+        { candidate: 4, vote: 1 },
         { candidate: 0, vote: 1 }
     ];
 
