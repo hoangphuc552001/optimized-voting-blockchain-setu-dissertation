@@ -5,42 +5,42 @@
     {
       "id": 1,
       "name": "Voter 1",
-      "leaf": "0x23ab791f41d87d6711ec9a94657cdf829b14ff8f9856c6836fa083e8364f84cb"
+      "leaf": "0x00201f2f8a15148066e564a1786431604fb7d5f270d153a35817e004982220c4"
     },
     {
       "id": 2,
       "name": "Voter 2",
-      "leaf": "0x17b59427418a20c7621fa2f6299028707228ae1f05896015bb887e5bc1af6ed5"
+      "leaf": "0x0852be23c0943d26c7fb29d5cb725bc96a5ac212f26fe1d58d41d22bbcd64bec"
     },
     {
       "id": 3,
       "name": "Voter 3",
-      "leaf": "0x1d057cabfdfabc5a11783f916b5550d519bbc7c709c7a0bb5c664484959e214b"
+      "leaf": "0x2a7fdef6e263b36b4cedf07e90b4b9855bcac7512945591376609f46ce676c10"
     },
     {
       "id": 4,
       "name": "Voter 4",
-      "leaf": "0x0a83ad161028c6ab981394dd8520bcf6c405f5ae139389bce0a2617f0014535c"
+      "leaf": "0x2692533fde3a7b7209ef38b3cfb562dbdae73d6ad66d3aae8ecaabbfed56b4ee"
     },
     {
       "id": 5,
       "name": "Voter 5",
-      "leaf": "0x30077ad2f010b769be53eb75490994514c21a9717d0e35b3d3c7af27547eaafe"
+      "leaf": "0x1a7e85e0e282492057965a5ca2b5d17be5080fa8ac740d6ebac36b1166ccbb0c"
     },
     {
       "id": 6,
       "name": "Voter 6",
-      "leaf": "0x1626eb5b6a5893c8776ece75d91449ca1cbd0d251aff7ec8530ee20713e0a3fe"
+      "leaf": "0x14834309b5815016e277a6bd43ca79c27d7e1b2f313f0fbb593df7bc3a67aa2a"
     },
     {
       "id": 7,
       "name": "Voter 7",
-      "leaf": "0x2cb6af3209db706dcd636a247b5bb062fa06fc5cb6655e8a2e260330c3549d6e"
+      "leaf": "0x207af1065e0bb337039ba59b64927bb5cd78131ea21eecfd49309e0fd2f0862e"
     },
     {
       "id": 8,
       "name": "Voter 8",
-      "leaf": "0x2b79d4ef056d8bd58c1a80819ed9c431a9848807e09585205c9d164a15b15753"
+      "leaf": "0x18cae48fc0ac9c84c33bfcf9ee60ad59e863c51d8c9812d970c7bcf5b31bcb0e"
     }
   ]
 }

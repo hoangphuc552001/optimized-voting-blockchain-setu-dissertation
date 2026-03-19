@@ -22,7 +22,7 @@ async function main() {
     await hre.run("compile");
 
     // Deploy Verifier (newly generated from circuit)
-    const Verifier = await ethers.getContractFactory("Groth16Verifier");
+    const Verifier = await ethers.getContractFactory("contracts/Verifier.sol:Groth16Verifier");
     const verifier = await Verifier.deploy();
     await verifier.waitForDeployment();
     const verifierAddress = await verifier.getAddress();

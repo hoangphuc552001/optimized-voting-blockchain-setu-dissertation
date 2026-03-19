@@ -5,7 +5,7 @@ node scripts/registerVoters.js
 node scripts/buildMerkleTree.js
 
 # Step 3: Compile Circom circuit
-circom BasicVote.circom --r1cs --wasm --sym -o build -l node_modules
+circom ./circuits/BasicVote.circom --r1cs --wasm --sym -o build -l node_modules
 
 # Step 4: Powers of Tau setup
 snarkjs powersoftau new bn128 15 build/pot15_0000.ptau -v

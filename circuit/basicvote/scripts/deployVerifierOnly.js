@@ -6,7 +6,7 @@ async function main() {
     console.log("Account balance:", (await ethers.provider.getBalance(deployer.address)).toString());
     console.log("\n--- Deploying Verifier Only ---");
 
-    const Verifier = await ethers.getContractFactory("Groth16Verifier");
+    const Verifier = await ethers.getContractFactory("contracts/Verifier.sol:Groth16Verifier");
     verifier = await Verifier.deploy();
     await verifier.waitForDeployment();
     verifierAddress = await verifier.getAddress();

@@ -12,7 +12,7 @@ async function generateBatchInput() {
 
     const voterMerkleRoot = BigInt(proofsData.merkleRoot);
     const electionId = BigInt(proofsData.electionId);
-    const batchSize = 4;
+    const batchSize = 100;
     const stateLevels = 5;
     const numStateLeaves = 2 ** stateLevels;
 

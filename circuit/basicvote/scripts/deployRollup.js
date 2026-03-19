@@ -37,7 +37,7 @@ async function main() {
 
     let verifierAddress;
     try {
-        const BatchVerifier = await ethers.getContractFactory("Groth16Verifier");
+        const BatchVerifier = await ethers.getContractFactory("contracts/BatchVerifier.sol:Groth16Verifier");
         const batchVerifier = await BatchVerifier.deploy();
         await batchVerifier.waitForDeployment();
         verifierAddress = await batchVerifier.getAddress();
