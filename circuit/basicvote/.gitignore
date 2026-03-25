@@ -100,3 +100,5 @@ $RECYCLE.BIN/
 
 # !circuit-params.ptau.example
 # !verification_key.json.example
+
+.agents/
