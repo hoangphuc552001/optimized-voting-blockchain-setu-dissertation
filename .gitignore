@@ -119,3 +119,4 @@ layer1/cache/
 layer1/typechain-types/
 zk-protocols/circom/target/
 zk-protocols/circuit_js/
+.gitnexus

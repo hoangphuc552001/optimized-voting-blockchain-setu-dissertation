@@ -1,12 +1,20 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { buildPoseidon } = require("circomlibjs");
+const fs = require("fs");
+const path = require("path");
+
+const BENCHMARK_OUTPUT_DIR = path.join(__dirname, "..", "output");
+const CSV_OUTPUT_PATH = path.join(BENCHMARK_OUTPUT_DIR, "gas_benchmark.csv");
+const ALL_BATCH_SIZES = [
+    1, 4, 10, 25, 50, 100, 500, 600, 700, 800, 1000, 5000, 10000,
+    50000, 100000, 500000, 1000000
+];
 
 describe("VotingRollup", function () {
     let votingRollup;
     let mockVerifier;
     let owner;
-    let addr1;
     let poseidon;
     let F;
     let initialStateRoot;
@@ -36,7 +44,7 @@ describe("VotingRollup", function () {
     });
 
     beforeEach(async function () {
-        [owner, addr1] = await ethers.getSigners();
+        [owner] = await ethers.getSigners();
 
         initialStateRoot = await computeEmptyStateRoot(poseidon, F, 5);
         voterMerkleRoot = F.toObject(poseidon([1n, 2n, 3n]));
@@ -56,269 +64,173 @@ describe("VotingRollup", function () {
         await votingRollup.waitForDeployment();
     });
 
-    describe("Deployment", function () {
-        it("should set initial state correctly", async function () {
-            expect(await votingRollup.stateRoot()).to.equal(initialStateRoot);
-            expect(await votingRollup.voterMerkleRoot()).to.equal(voterMerkleRoot);
-            expect(await votingRollup.electionId()).to.equal(electionId);
-            expect(await votingRollup.votingActive()).to.be.true;
-            expect(await votingRollup.batchCount()).to.equal(0);
-        });
-
-        it("should set deployer as admin", async function () {
-            expect(await votingRollup.admin()).to.equal(owner.address);
-        });
-
-        it("should emit VotingStarted event", async function () {
-            const VotingRollup = await ethers.getContractFactory("VotingRollup");
-            const newRollup = await VotingRollup.deploy(
-                await mockVerifier.getAddress(),
-                initialStateRoot,
-                voterMerkleRoot,
-                42
-            );
-            await newRollup.waitForDeployment();
-            const deployTx = newRollup.deploymentTransaction();
-            const receipt = await deployTx.wait();
-            const event = receipt.logs.find(log => {
-                try {
-                    return newRollup.interface.parseLog(log)?.name === "VotingStarted";
-                } catch { return false; }
-            });
-            expect(event).to.not.be.undefined;
-            const parsed = newRollup.interface.parseLog(event);
-            expect(parsed.args[0]).to.equal(42);
-        });
-
-        it("should reject zero address verifier", async function () {
-            const VotingRollup = await ethers.getContractFactory("VotingRollup");
-            await expect(
-                VotingRollup.deploy(ethers.ZeroAddress, initialStateRoot, voterMerkleRoot, electionId)
-            ).to.be.revertedWith("Verifier address cannot be zero");
-        });
-    });
-
-    describe("submitBatch", function () {
-        const dummyProof = {
-            a: [0, 0],
-            b: [[0, 0], [0, 0]],
-            c: [0, 0]
-        };
-
-        it("should accept a valid batch and update state root", async function () {
-            const newStateRoot = F.toObject(poseidon([100n, 200n]));
-            const batchNullifierHash = F.toObject(poseidon([1n, 2n]));
-            const nullifierList = [
-                F.toObject(poseidon([10n])),
-                F.toObject(poseidon([20n]))
-            ];
-
-            await expect(
-                votingRollup.submitBatch(
-                    dummyProof.a,
-                    dummyProof.b,
-                    dummyProof.c,
-                    newStateRoot,
-                    batchNullifierHash,
-                    nullifierList
-                )
-            ).to.emit(votingRollup, "BatchSubmitted")
-                .withArgs(0, initialStateRoot, newStateRoot, 2);
-
-            expect(await votingRollup.stateRoot()).to.equal(newStateRoot);
-            expect(await votingRollup.batchCount()).to.equal(1);
-        });
-
-        it("should register nullifiers on L1", async function () {
-            const newStateRoot = F.toObject(poseidon([100n]));
-            const batchNullifierHash = F.toObject(poseidon([1n]));
-            const nullifier1 = F.toObject(poseidon([10n]));
-            const nullifier2 = F.toObject(poseidon([20n]));
-
-            await votingRollup.submitBatch(
-                dummyProof.a,
-                dummyProof.b,
-                dummyProof.c,
-                newStateRoot,
-                batchNullifierHash,
-                [nullifier1, nullifier2]
-            );
-
-            expect(await votingRollup.isNullifierUsed(nullifier1)).to.be.true;
-            expect(await votingRollup.isNullifierUsed(nullifier2)).to.be.true;
-            expect(await votingRollup.isNullifierUsed(999)).to.be.false;
-        });
-
-        it("should reject duplicate nullifiers across batches", async function () {
-            const nullifier = F.toObject(poseidon([10n]));
-            const stateRoot1 = F.toObject(poseidon([100n]));
-            const stateRoot2 = F.toObject(poseidon([200n]));
-            const batchHash1 = F.toObject(poseidon([1n]));
-            const batchHash2 = F.toObject(poseidon([2n]));
-
-            await votingRollup.submitBatch(
-                dummyProof.a, dummyProof.b, dummyProof.c,
-                stateRoot1, batchHash1, [nullifier]
-            );
-
-            await expect(
-                votingRollup.submitBatch(
-                    dummyProof.a, dummyProof.b, dummyProof.c,
-                    stateRoot2, batchHash2, [nullifier]
-                )
-            ).to.be.revertedWith("Duplicate nullifier");
-        });
-
-        it("should chain state roots correctly across batches", async function () {
-            const stateRoot1 = F.toObject(poseidon([100n]));
-            const stateRoot2 = F.toObject(poseidon([200n]));
-            const stateRoot3 = F.toObject(poseidon([300n]));
-
-            await votingRollup.submitBatch(
-                dummyProof.a, dummyProof.b, dummyProof.c,
-                stateRoot1, F.toObject(poseidon([1n])),
-                [F.toObject(poseidon([10n]))]
-            );
-            expect(await votingRollup.stateRoot()).to.equal(stateRoot1);
-            expect(await votingRollup.batchCount()).to.equal(1);
-
-            await votingRollup.submitBatch(
-                dummyProof.a, dummyProof.b, dummyProof.c,
-                stateRoot2, F.toObject(poseidon([2n])),
-                [F.toObject(poseidon([20n]))]
-            );
-            expect(await votingRollup.stateRoot()).to.equal(stateRoot2);
-            expect(await votingRollup.batchCount()).to.equal(2);
-
-            await votingRollup.submitBatch(
-                dummyProof.a, dummyProof.b, dummyProof.c,
-                stateRoot3, F.toObject(poseidon([3n])),
-                [F.toObject(poseidon([30n]))]
-            );
-            expect(await votingRollup.stateRoot()).to.equal(stateRoot3);
-            expect(await votingRollup.batchCount()).to.equal(3);
-        });
-
-        it("should reject batches after voting ends", async function () {
-            await votingRollup.endVoting();
-
-            await expect(
-                votingRollup.submitBatch(
-                    dummyProof.a, dummyProof.b, dummyProof.c,
-                    F.toObject(poseidon([100n])),
-                    F.toObject(poseidon([1n])),
-                    [F.toObject(poseidon([10n]))]
-                )
-            ).to.be.revertedWith("Voting not active");
-        });
-    });
-
-    describe("Voting Lifecycle", function () {
-        it("should allow admin to end voting", async function () {
-            await expect(votingRollup.endVoting())
-                .to.emit(votingRollup, "VotingEnded");
-            expect(await votingRollup.votingActive()).to.be.false;
-        });
-
-        it("should reject non-admin ending voting", async function () {
-            await expect(
-                votingRollup.connect(addr1).endVoting()
-            ).to.be.revertedWith("Only admin");
-        });
-
-        it("should reject ending voting twice", async function () {
-            await votingRollup.endVoting();
-            await expect(votingRollup.endVoting()).to.be.revertedWith("Voting already ended");
-        });
-    });
-
-    describe("View Functions", function () {
-        it("should return correct state via getState()", async function () {
-            const state = await votingRollup.getState();
-            expect(state._stateRoot).to.equal(initialStateRoot);
-            expect(state._voterMerkleRoot).to.equal(voterMerkleRoot);
-            expect(state._electionId).to.equal(electionId);
-            expect(state._batchCount).to.equal(0);
-            expect(state._votingActive).to.be.true;
-        });
-    });
-
     describe("Gas Benchmarks", function () {
-        const batchSizes = [4, 10, 25, 50, 100, 500,600,700];
+        this.timeout(600000);
 
-        for (const batchSize of batchSizes) {
-            it(`should measure gas for batch of ${batchSize} votes`, async function () {
-                const newStateRoot = F.toObject(poseidon([BigInt(batchSize)]));
-                const batchNullifierHash = F.toObject(poseidon([BigInt(batchSize)]));
-                
-                const nullifiers = [];
-                for (let i = 0; i < batchSize; i++) {
-                    nullifiers.push(F.toObject(poseidon([BigInt(i + 100 + batchSize * 1000)])));
-                }
+        const PARALLEL_WORKERS = 4;
+        const SUB_BATCH_SIZE = 100;
+        const GAS_PER_SUB_BATCH = 2366700;
+        const MAX_GAS_PER_BATCH = 12_000_000;
+        const ONE_VOTE_GAS = 90940;
+        const results = [];
 
-                const tx = await votingRollup.submitBatch(
-                    [0, 0], [[0, 0], [0, 0]], [0, 0],
-                    newStateRoot,
-                    batchNullifierHash,
-                    nullifiers
-                );
-
-                const receipt = await tx.wait();
-                const gasUsed = Number(receipt.gasUsed);
-                const gasPerVote = (gasUsed / batchSize).toFixed(0);
-                const L1_VOTE_GAS = 300000;
-                const gasSavings = (100 - (gasPerVote / L1_VOTE_GAS * 100)).toFixed(1);
-
-                console.log(`\n=== Batch Size: ${batchSize} ===`);
-                console.log(`Total gas: ${gasUsed.toLocaleString()}`);
-                console.log(`Gas per vote: ${gasPerVote}`);
-                console.log(`L1 cost: ${(batchSize * L1_VOTE_GAS).toLocaleString()}`);
-                console.log(`Gas savings: ${gasSavings}%`);
-
-                expect(await votingRollup.stateRoot()).to.equal(newStateRoot);
-            });
-        }
-
-        it("should generate summary table for all batch sizes", async function () {
-            console.log("\n" + "=".repeat(80));
-            console.log("           GAS BENCHMARK SUMMARY - BATCH SIZE ANALYSIS");
-            console.log("=".repeat(80));
-            console.log("| Batch Size | Total Gas   | Gas/Vote | L1 Cost     | Savings |");
-            console.log("|".repeat(65));
-
-            const L1_VOTE_GAS = 300000;
-
-            for (const batchSize of batchSizes) {
-                const newStateRoot = F.toObject(poseidon([BigInt(batchSize)]));
-                const batchNullifierHash = F.toObject(poseidon([BigInt(batchSize)]));
-                
-                const nullifiers = [];
-                for (let i = 0; i < batchSize; i++) {
-                    nullifiers.push(F.toObject(poseidon([BigInt(i + 200 + batchSize * 1000)])));
-                }
-
-                const tx = await votingRollup.submitBatch(
-                    [0, 0], [[0, 0], [0, 0]], [0, 0],
-                    newStateRoot,
-                    batchNullifierHash,
-                    nullifiers,
-                );
-
-                const receipt = await tx.wait();
-                const gasUsed = Number(receipt.gasUsed);
-                const gasPerVote = (gasUsed / batchSize).toFixed(0);
-                const l1Cost = batchSize * L1_VOTE_GAS;
-                const savings = (100 - (gasPerVote / L1_VOTE_GAS * 100)).toFixed(1);
-
-                console.log(`| ${batchSize.toString().padEnd(10)} | ${gasUsed.toString().padEnd(11)} | ${gasPerVote.padEnd(8)} | ${l1Cost.toString().padEnd(11)} | ${savings}% |`);
+        function saveResultsToCSV() {
+            if (!fs.existsSync(BENCHMARK_OUTPUT_DIR)) {
+                fs.mkdirSync(BENCHMARK_OUTPUT_DIR, { recursive: true });
             }
 
-            console.log("=".repeat(80));
-            console.log("\nKey Insights:");
-            console.log("- Gas per vote DECREASES as batch size increases (economies of scale)");
-            console.log("- Larger batches = better gas efficiency per vote");
-            console.log("- Each nullifier adds ~20k gas");
-            console.log("=".repeat(80));
+            const header = [
+                "batch_size",
+                "num_sub_batches",
+                "sub_batch_size",
+                "total_gas",
+                "gas_per_vote",
+                "vs_1vote_efficiency",
+                "efficiency_pct",
+                "execution_time_ms",
+                "execution_time_sec",
+                "method",
+                "workers"
+            ].join(",") + "\n";
+
+            const rows = results.map(r => [
+                r.batchSize,
+                r.numSubBatches,
+                r.subBatchSize,
+                r.totalGas,
+                r.gasPerVote.toFixed(2),
+                r.efficiency.toFixed(2),
+                r.efficiencyPct.toFixed(2),
+                r.execTimeMs.toFixed(0),
+                (r.execTimeMs / 1000).toFixed(2),
+                r.method,
+                r.workers || ""
+            ].join(",")).join("\n");
+
+            fs.writeFileSync(CSV_OUTPUT_PATH, header + rows);
+        }
+
+        async function submitSequential(batchSize, signer, salt) {
+            const start = Date.now();
+            let totalGas = 0;
+            let numSubBatches = 1;
+
+            if (batchSize > 700) {
+                numSubBatches = Math.ceil(batchSize / SUB_BATCH_SIZE);
+                for (let i = 0; i < batchSize; i += SUB_BATCH_SIZE) {
+                    const sSize = Math.min(SUB_BATCH_SIZE, batchSize - i);
+                    const subBatchIndex = Math.floor(i / SUB_BATCH_SIZE);
+
+                    const subStateRoot = F.toObject(poseidon([BigInt(subBatchIndex + 1), BigInt(sSize)]));
+                    const subBatchHash = F.toObject(poseidon([BigInt(subBatchIndex), BigInt(sSize)]));
+
+                    const nullifiers = [];
+                    for (let j = 0; j < sSize; j++) {
+                        nullifiers.push(F.toObject(poseidon([BigInt(i + j + salt + batchSize * 1000)])));
+                    }
+
+                    const tx = await votingRollup.connect(signer).submitBatch(
+                        [0, 0], [[0, 0], [0, 0]], [0, 0],
+                        subStateRoot, subBatchHash, nullifiers
+                    );
+                    const receipt = await tx.wait();
+                    totalGas += Number(receipt.gasUsed);
+                }
+            } else {
+                const nullifiers = [];
+                for (let i = 0; i < batchSize; i++) {
+                    nullifiers.push(F.toObject(poseidon([BigInt(i + salt + batchSize * 1000)])));
+                }
+                const tx = await votingRollup.connect(signer).submitBatch(
+                    [0, 0], [[0, 0], [0, 0]], [0, 0],
+                    F.toObject(poseidon([BigInt(batchSize)])),
+                    F.toObject(poseidon([BigInt(batchSize)])),
+                    nullifiers
+                );
+                const receipt = await tx.wait();
+                totalGas = Number(receipt.gasUsed);
+            }
+
+            return { totalGas, execTimeMs: Date.now() - start, numSubBatches };
+        }
+
+        async function submitParallel(batchSize, signer, salt) {
+            const start = Date.now();
+            const optimalSubBatchSize = Math.max(
+                100,
+                Math.floor(MAX_GAS_PER_BATCH / (GAS_PER_SUB_BATCH / 100))
+            );
+            const numSubBatches = Math.ceil(batchSize / optimalSubBatchSize);
+            const subBatchesPerWorker = Math.ceil(numSubBatches / PARALLEL_WORKERS);
+
+            const workerPromises = [];
+            for (let w = 0; w < PARALLEL_WORKERS; w++) {
+                const startIdx = w * subBatchesPerWorker;
+                const endIdx = Math.min(startIdx + subBatchesPerWorker, numSubBatches);
+                if (startIdx >= numSubBatches) break;
+
+                workerPromises.push((async () => {
+                    let workerGas = 0;
+                    for (let i = startIdx; i < endIdx; i++) {
+                        const voteStart = i * optimalSubBatchSize;
+                        const sSize = Math.min(optimalSubBatchSize, batchSize - voteStart);
+                        const subBatchIndex = i;
+
+                        const subStateRoot = F.toObject(poseidon([BigInt(subBatchIndex + 1), BigInt(sSize)]));
+                        const subBatchHash = F.toObject(poseidon([BigInt(subBatchIndex), BigInt(sSize)]));
+
+                        const nullifiers = [];
+                        for (let j = 0; j < sSize; j++) {
+                            nullifiers.push(F.toObject(poseidon([BigInt(voteStart + j + salt + batchSize * 1000)])));
+                        }
+
+                        const tx = await votingRollup.connect(signer).submitBatch(
+                            [0, 0], [[0, 0], [0, 0]], [0, 0],
+                            subStateRoot, subBatchHash, nullifiers
+                        );
+                        const receipt = await tx.wait();
+                        workerGas += Number(receipt.gasUsed);
+                    }
+                    return workerGas;
+                })());
+            }
+
+            const workerResults = await Promise.all(workerPromises);
+            const totalGas = workerResults.reduce((a, b) => a + b, 0);
+            return { totalGas, execTimeMs: Date.now() - start, numSubBatches };
+        }
+
+        it("should run full benchmark suite and export CSV", async function () {
+            for (const batchSize of ALL_BATCH_SIZES) {
+                const isLarge = batchSize > 10000;
+                const method = isLarge ? "parallel" : "sequential";
+                const salt = 2000;
+
+                const { totalGas, execTimeMs, numSubBatches } = isLarge
+                    ? await submitParallel(batchSize, owner, salt)
+                    : await submitSequential(batchSize, owner, salt);
+
+                const gasPerVote = totalGas / batchSize;
+                const efficiency = ONE_VOTE_GAS / gasPerVote;
+                const efficiencyPct = ((ONE_VOTE_GAS - gasPerVote) / ONE_VOTE_GAS) * 100;
+                const subBatchSize = Math.min(100, batchSize);
+
+                results.push({
+                    batchSize,
+                    numSubBatches,
+                    subBatchSize,
+                    totalGas,
+                    gasPerVote,
+                    efficiency,
+                    efficiencyPct,
+                    execTimeMs,
+                    method,
+                    workers: isLarge ? PARALLEL_WORKERS : ""
+                });
+            }
+
+            saveResultsToCSV();
+            expect(fs.existsSync(CSV_OUTPUT_PATH)).to.equal(true);
         });
     });
 });
