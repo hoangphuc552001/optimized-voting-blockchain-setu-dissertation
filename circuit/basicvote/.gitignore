@@ -102,3 +102,4 @@ $RECYCLE.BIN/
 # !verification_key.json.example
 
 .agents/
+.cursor/
