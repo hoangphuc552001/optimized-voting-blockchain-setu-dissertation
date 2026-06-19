@@ -151,7 +151,12 @@ describe("VotingRollup", function () {
                 totalGas = Number(receipt.gasUsed);
             }
 
-            return { totalGas, execTimeMs: Date.now() - start, numSubBatches };
+            return {
+                totalGas,
+                execTimeMs: Date.now() - start,
+                numSubBatches,
+                subBatchSize: batchSize > 700 ? SUB_BATCH_SIZE : batchSize
+            };
         }
 
         async function submitParallel(batchSize, signer, salt) {
@@ -197,7 +202,7 @@ describe("VotingRollup", function () {
 
             const workerResults = await Promise.all(workerPromises);
             const totalGas = workerResults.reduce((a, b) => a + b, 0);
-            return { totalGas, execTimeMs: Date.now() - start, numSubBatches };
+            return { totalGas, execTimeMs: Date.now() - start, numSubBatches, subBatchSize: optimalSubBatchSize };
         }
 
         it("should run full benchmark suite and export CSV", async function () {
@@ -206,14 +211,13 @@ describe("VotingRollup", function () {
                 const method = isLarge ? "parallel" : "sequential";
                 const salt = 2000;
 
-                const { totalGas, execTimeMs, numSubBatches } = isLarge
+                const { totalGas, execTimeMs, numSubBatches, subBatchSize } = isLarge
                     ? await submitParallel(batchSize, owner, salt)
                     : await submitSequential(batchSize, owner, salt);
 
                 const gasPerVote = totalGas / batchSize;
                 const efficiency = ONE_VOTE_GAS / gasPerVote;
                 const efficiencyPct = ((ONE_VOTE_GAS - gasPerVote) / ONE_VOTE_GAS) * 100;
-                const subBatchSize = Math.min(100, batchSize);
 
                 results.push({
                     batchSize,
