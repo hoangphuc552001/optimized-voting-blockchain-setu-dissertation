@@ -95,7 +95,6 @@
 <section class="view on" id="view-voter">
   <div class="viewhead">
     <h3>Voter device <span class="domain v">trust domain 1 &middot; your browser</span></h3>
-    <p>Proving runs in this tab. The secret below is used to build a witness here and is never sent anywhere &mdash; the server receives only a proof and five public signals.</p>
   </div>
 
   <div class="grid c12">
@@ -110,21 +109,6 @@
           <span class="chip spacer" id="voter-count">&mdash;</span>
         </div>
         <div class="idlist" id="sel-voter-list"></div>
-        <label class="field" style="margin:14px 0 0">
-          <span class="lbl">or pick from the list</span>
-          <select id="sel-voter"></select>
-        </label>
-      </div>
-
-      <div class="card tint-v">
-        <div class="cardhead"><h4>
-          <svg class="i" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
-          Private &mdash; stays here
-        </h4></div>
-        <dl class="kv">
-          <dt>voterSecret</dt><dd id="pv-secret">&mdash;</dd>
-          <dt>merkle path</dt><dd id="pv-path">&mdash;</dd>
-        </dl>
       </div>
 
       <div class="card">
@@ -156,7 +140,9 @@
 
         <div class="split" style="margin-top:18px">
           <div class="wbox pub">
-            <h5>Public &mdash; sent to the operator <span class="chip ok">5 signals</span></h5>
+            <h5>
+              <svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+              Public</h5>
             <dl class="kv">
               <dt>nullifier</dt><dd id="pb-null">&mdash;</dd>
               <dt>candidate</dt><dd id="pb-cand">&mdash;</dd>
@@ -165,13 +151,15 @@
               <dt>electionId</dt><dd id="pb-eid">&mdash;</dd>
             </dl>
           </div>
-          <div class="wbox priv">
-            <h5>What nobody else learns</h5>
-            <ul class="cannot">
-              <li><s>which registered voter this is</s></li>
-              <li><s>the secret behind the nullifier</s></li>
-              <li><s>the position in the eligibility tree</s></li>
-            </ul>
+          <div class="card tint-v">
+            <div class="cardhead"><h4>
+              <svg class="i" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+              Private
+            </h4></div>
+            <dl class="kv">
+              <dt>voterSecret</dt><dd id="pv-secret">&mdash;</dd>
+              <dt>merkle path</dt><dd id="pv-path">&mdash;</dd>
+            </dl>
           </div>
         </div>
 
@@ -211,23 +199,10 @@
 <section class="view" id="view-operator">
   <div class="viewhead">
     <h3>Rollup operator <span class="domain o">trust domain 2 &middot; off-chain</span></h3>
-    <p>Collects already-proven ballots and folds them into a single state transition. It has liveness power only &mdash; it can delay a vote, but it cannot forge, alter or drop one without the batch proof failing.</p>
   </div>
 
   <div class="grid c12">
     <div class="col5 stack">
-      <div class="card tint-e">
-        <div class="cardhead"><h4>
-          <svg class="i" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8"/><path d="M9.4 5.2A9.6 9.6 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.4 3.6M6.3 6.6C3.9 8.2 3 10.6 3 12c0 2.5 4 7 9 7 1.2 0 2.3-.2 3.3-.6"/></svg>
-          What the operator cannot see
-        </h4></div>
-        <ul class="cannot">
-          <li><s>voterSecret</s></li>
-          <li><s>Merkle path / tree position</s></li>
-          <li><s>which registered voter cast this ballot</s></li>
-        </ul>
-      </div>
-
       <div class="card">
         <div class="cardhead">
           <h4>
@@ -284,7 +259,6 @@
 <section class="view" id="view-mempool">
   <div class="viewhead">
     <h3>Mempool <span class="domain o">trust domain 2 &middot; off-chain</span></h3>
-    <p>Proven ballots waiting to be batched, and the admission checks the operator ran on the most recent one.</p>
   </div>
 
   <div class="grid c12">
@@ -326,7 +300,6 @@
 <section class="view" id="view-ledger">
   <div class="viewhead">
     <h3>Ethereum L1 <span class="domain c">trust domain 3 &middot; VotingRollupV2</span></h3>
-    <p>The only trust anchor. It verifies every batch proof in full, keeps the canonical nullifier registry, and rejects anything that does not check out.</p>
   </div>
 
   <div class="grid c12">
@@ -428,7 +401,6 @@
 <section class="view" id="view-explorer">
   <div class="viewhead">
     <h3>Block explorer <span class="domain c">public data only</span></h3>
-    <p>Read from the node over <code>eth_*</code> RPC. No operator involved &mdash; an external observer sees exactly this, and nothing more.</p>
   </div>
 
   <div class="btnrow" style="margin-bottom:16px">
@@ -466,7 +438,6 @@
 <section class="view" id="view-attack">
   <div class="viewhead">
     <h3>Attack panel <span class="domain a">adversarial testing</span></h3>
-    <p>An attack dies at the lowest rung that can catch it, and the lower it dies the stronger the guarantee. Arm a voter-side fault here, then cast a ballot on the Voter Terminal.</p>
   </div>
 
   <div class="grid c12">

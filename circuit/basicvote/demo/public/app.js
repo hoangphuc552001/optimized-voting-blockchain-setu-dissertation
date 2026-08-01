@@ -132,7 +132,7 @@ async function boot() {
 
   $("#pill-election").innerHTML = `election <b>${data.electionId}</b>`;
   $("#pill-root").innerHTML = `root <b>${short(data.voterMerkleRoot, 6, 4)}</b>`;
-  $("#pill-chain").innerHTML = `spotCheck <b>${data.spotCheckCount}/${data.batchSize}</b>`;
+  $("#pill-chain").innerHTML = ``;
   $("#m-constraints").textContent = data.circuits.voteProof.constraints.toLocaleString();
   $("#voter-count").textContent = `${data.voters.length} registered`;
 
@@ -165,23 +165,18 @@ async function boot() {
     </div>`).join("");
 
   $$("#sel-voter-list .iditem").forEach(el => el.addEventListener("click", () => {
-    $("#sel-voter").value = el.dataset.index;
     S.voterIndex = Number(el.dataset.index);
     markVoter();
     loadCredentials(S.voterIndex);
   }));
 
-  const sel = $("#sel-voter");
-  sel.innerHTML = data.voters
-    .map(v => `<option value="${v.index}">${v.name} — commitment ${short(v.commitment, 8, 4)}</option>`)
-    .join("");
+
 
   $("#candidates").innerHTML = data.candidates
     .map(cd => `<button class="cand" data-id="${cd.id}">
         <span class="av">${cd.id}</span>
         <span>
           <span class="nm">${cd.name}</span>
-          <span class="role">${cd.party}</span>
         </span>
         <span class="tick"><svg class="i sm" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></span>
       </button>`)
@@ -762,19 +757,6 @@ async function showTx(hash) {
       <dl>${l.args.map(a => `<dt>${a.name}</dt><dd>${a.value}</dd>`).join("")}</dl>
     </div>`).join("");
 
-  const r = d.reveals;
-  const reveals = r ? `
-    <div class="section">
-      <div class="cardhead"><h4>What this transaction reveals — ${r.headline}</h4></div>
-      <div class="reveals">
-        <div class="revcol pub"><h5>Public — anyone can read this</h5>
-          <ul>${r.disclosed.map(x => `<li>${x}</li>`).join("")}</ul></div>
-        <div class="revcol priv"><h5>Still hidden</h5>
-          <ul>${r.hidden.map(x => `<li>${x}</li>`).join("")}</ul></div>
-      </div>
-      ${r.note ? `<div class="revnote">${r.note}</div>` : ""}
-    </div>` : "";
-
   $("#exp-detail").innerHTML = `
     <div class="txhead">
       <span class="sig">${d.method ? d.method.signature : (d.to ? "raw call" : "contract creation")}</span>
@@ -792,8 +774,6 @@ async function showTx(hash) {
       ${field("Tx fee", d.feeEth ? `${Number(d.feeEth).toFixed(8)} ETH` : "—")}
       ${field("Calldata", `${d.calldataBytes.toLocaleString()} bytes`)}
     </div>
-
-    ${reveals}
 
     ${args ? `<div class="section"><div class="cardhead"><h4>Decoded input</h4></div>${args}</div>` : ""}
     ${logs ? `<div class="section"><div class="cardhead"><h4>Event logs</h4></div>${logs}</div>` : ""}
@@ -904,11 +884,6 @@ $("#btn-discard").addEventListener("click", () => {
   term("#voter-term", "Ballot reset. Pick a voter and a candidate to begin.");
 });
 
-$("#sel-voter").addEventListener("change", e => {
-  S.voterIndex = Number(e.target.value);
-  markVoter();
-  loadCredentials(S.voterIndex);
-});
 
 $("#sel-attack").addEventListener("change", () => loadCredentials(S.voterIndex));
 $("#btn-prove").addEventListener("click", proveAndSend);
@@ -943,6 +918,26 @@ $("#btn-end").addEventListener("click", async () => {
   const { data } = await api("/api/lifecycle/end-voting", { method: "POST" });
   lifecycleResult("End voting (admin)", data);
   await refresh();
+
+  if (data.ok) {
+    const stateRes = await api("/api/state");
+    const tallies = stateRes.data.operator.tallies || {};
+    const total = stateRes.data.operator.totalVotes || 0;
+    
+    const rows = S.election.candidates.map(cd => {
+        const n = tallies[cd.id] || 0;
+        const pct = total ? Math.round(100 * n / total) : 0;
+        return { k: `${cd.id} - ${cd.name}`, v: `${n} votes (${pct}%)` };
+    });
+    rows.push({ k: "Total Votes", v: `${total}`, dim: true });
+    
+    overlay({
+      title: "Election Ended",
+      lede: "The voting is closed. Here is the final tally reconstructed from the operator's state tree.",
+      rows: rows,
+      closeLabel: "Understood"
+    });
+  }
 });
 
 $("#btn-end-nonadmin").addEventListener("click", async () => {

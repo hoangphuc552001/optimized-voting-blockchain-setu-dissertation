@@ -5,11 +5,11 @@ const { buildPoseidon } = require("circomlibjs");
 const ROOT = path.join(__dirname, "..", "..");
 
 const CANDIDATES = [
-    { id: 0, name: "Ada Lovelace", party: "Analytical" },
-    { id: 1, name: "Alan Turing", party: "Computable" },
-    { id: 2, name: "Grace Hopper", party: "Compiler" },
-    { id: 3, name: "Katherine Johnson", party: "Orbital" },
-    { id: 4, name: "Edsger Dijkstra", party: "Shortest Path" }
+    { id: 0, name: "Ada Lovelace" },
+    { id: 1, name: "Alan Turing" },
+    { id: 2, name: "Grace Hopper" },
+    { id: 3, name: "Katherine Johnson" },
+    { id: 4, name: "Edsger Dijkstra" }
 ];
 
 /**
