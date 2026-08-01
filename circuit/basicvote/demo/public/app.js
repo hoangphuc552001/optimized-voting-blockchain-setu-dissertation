@@ -861,11 +861,7 @@ $("#nav-cta").addEventListener("click", () => {
 
 $("#btn-goto-voter").addEventListener("click", () => show("voter"));
 
-$("#logbar").addEventListener("click", ev => {
-  if (ev.target.closest("#btn-clearlog")) return;
-  $("#logpanel").classList.toggle("open");
-});
-$("#btn-log-toggle").addEventListener("click", () => $("#logpanel").classList.toggle("open"));
+
 
 $("#overlay-scrim").addEventListener("click", closeOverlay);
 $("#overlay-close").addEventListener("click", ev => {
