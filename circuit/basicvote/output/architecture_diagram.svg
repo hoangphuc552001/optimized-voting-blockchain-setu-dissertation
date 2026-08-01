@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 1180" font-family="Segoe UI, Inter, Arial, sans-serif">
+  <defs>
+    <!-- Tier gradients -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#111a2e"/>
+    </linearGradient>
+    <linearGradient id="g-client" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f3a2e"/>
+      <stop offset="100%" stop-color="#0a2820"/>
+    </linearGradient>
+    <linearGradient id="g-backend" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e2a4a"/>
+      <stop offset="100%" stop-color="#141d36"/>
+    </linearGradient>
+    <linearGradient id="g-data" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a2a1a"/>
+      <stop offset="100%" stop-color="#2a1f14"/>
+    </linearGradient>
+    <linearGradient id="g-chain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a1a1a"/>
+      <stop offset="100%" stop-color="#2a1414"/>
+    </linearGradient>
+    <linearGradient id="g-infra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a1a3a"/>
+      <stop offset="100%" stop-color="#1f1428"/>
+    </linearGradient>
+
+    <!-- Component card gradient -->
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2540" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0f1828" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.45"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Arrow markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#60a5fa"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#f87171"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <!-- ===================== BACKGROUND ===================== -->
+  <rect width="1800" height="1180" fill="url(#bg)"/>
+
+  <!-- ===================== TITLE ===================== -->
+  <text x="900" y="55" text-anchor="middle" font-size="34" font-weight="700" fill="#f1f5f9">
+    ZK Rollup Voting System — End-to-End Architecture
+  </text>
+  <text x="900" y="85" text-anchor="middle" font-size="17" fill="#94a3b8">
+    Privacy-preserving on-chain voting · Two-layer Groth16 zero-knowledge rollup · Ethereum L1
+  </text>
+
+  <!-- ===================== TIER PANELS ===================== -->
+  <!-- CLIENT -->
+  <rect x="40" y="140" width="300" height="780" rx="18" fill="url(#g-client)" stroke="#34d399" stroke-width="2"/>
+  <text x="190" y="180" text-anchor="middle" font-size="20" font-weight="700" fill="#d1fae5">👤  CLIENT TIER</text>
+  <text x="190" y="205" text-anchor="middle" font-size="13" fill="#86efac" font-style="italic">Voter Device · browser / CLI</text>
+
+  <!-- BACKEND -->
+  <rect x="380" y="140" width="380" height="780" rx="18" fill="url(#g-backend)" stroke="#60a5fa" stroke-width="2"/>
+  <text x="570" y="180" text-anchor="middle" font-size="20" font-weight="700" fill="#dbeafe">⚙️  APPLICATION TIER</text>
+  <text x="570" y="205" text-anchor="middle" font-size="13" fill="#93c5fd" font-style="italic">Rollup Operator · Node.js / Express</text>
+
+  <!-- DATA -->
+  <rect x="800" y="140" width="280" height="780" rx="18" fill="url(#g-data)" stroke="#fbbf24" stroke-width="2"/>
+  <text x="940" y="180" text-anchor="middle" font-size="20" font-weight="700" fill="#fef3c7">💾  DATA TIER</text>
+  <text x="940" y="205" text-anchor="middle" font-size="13" fill="#fcd34d" font-style="italic">Off-Chain State Storage</text>
+
+  <!-- BLOCKCHAIN -->
+  <rect x="1120" y="140" width="360" height="780" rx="18" fill="url(#g-chain)" stroke="#f87171" stroke-width="2"/>
+  <text x="1300" y="180" text-anchor="middle" font-size="20" font-weight="700" fill="#fee2e2">⛓️  BLOCKCHAIN TIER</text>
+  <text x="1300" y="205" text-anchor="middle" font-size="13" fill="#fca5a5" font-style="italic">Ethereum L1 Smart Contracts</text>
+
+  <!-- INFRASTRUCTURE -->
+  <rect x="1520" y="140" width="240" height="780" rx="18" fill="url(#g-infra)" stroke="#a78bfa" stroke-width="2"/>
+  <text x="1640" y="180" text-anchor="middle" font-size="20" font-weight="700" fill="#ede9fe">🔧  INFRA</text>
+  <text x="1640" y="205" text-anchor="middle" font-size="13" fill="#c4b5fd" font-style="italic">Network &amp; Tooling</text>
+
+  <!-- ===================== CLIENT TIER COMPONENTS ===================== -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="240" width="240" height="90" rx="12" fill="url(#card)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="190" y="275" text-anchor="middle" font-size="30">🗳️</text>
+    <text x="190" y="305" text-anchor="middle" font-size="16" font-weight="600" fill="#f1f5f9">Voter</text>
+    <text x="190" y="322" text-anchor="middle" font-size="11" fill="#94a3b8">browser · CLI client</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="365" width="240" height="90" rx="12" fill="url(#card)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="190" y="400" text-anchor="middle" font-size="30">🔐</text>
+    <text x="190" y="430" text-anchor="middle" font-size="16" font-weight="600" fill="#f1f5f9">Voter Secret</text>
+    <text x="190" y="447" text-anchor="middle" font-size="11" fill="#94a3b8">voter-secrets.json (local)</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="490" width="240" height="90" rx="12" fill="url(#card)" stroke="#34d399" stroke-width="1.5"/>
+    <text x="190" y="525" text-anchor="middle" font-size="30">🌿</text>
+    <text x="190" y="555" text-anchor="middle" font-size="16" font-weight="600" fill="#f1f5f9">Merkle Proof</text>
+    <text x="190" y="572" text-anchor="middle" font-size="11" fill="#94a3b8">eligibility witness</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="615" width="240" height="120" rx="12" fill="url(#card)" stroke="#34d399" stroke-width="2"/>
+    <text x="190" y="655" text-anchor="middle" font-size="32">⚡</text>
+    <text x="190" y="685" text-anchor="middle" font-size="16" font-weight="700" fill="#f1f5f9">VoteProof Circuit</text>
+    <text x="190" y="704" text-anchor="middle" font-size="11" fill="#86efac">circom · snarkjs · Groth16</text>
+    <text x="190" y="720" text-anchor="middle" font-size="11" fill="#86efac">runs entirely client-side</text>
+  </g>
+
+  <!-- Privacy boundary callout -->
+  <g>
+    <rect x="60" y="780" width="260" height="120" rx="10" fill="#0a2820" stroke="#34d399" stroke-width="1" stroke-dasharray="5,3"/>
+    <text x="190" y="810" text-anchor="middle" font-size="13" font-weight="700" fill="#34d399">🔒 PRIVACY BOUNDARY</text>
+    <text x="190" y="835" text-anchor="middle" font-size="11" fill="#a7f3d0">Voter secret NEVER leaves</text>
+    <text x="190" y="852" text-anchor="middle" font-size="11" fill="#a7f3d0">the device. Only the proof</text>
+    <text x="190" y="869" text-anchor="middle" font-size="11" fill="#a7f3d0">+ (candidate, vote) is sent.</text>
+    <text x="190" y="888" text-anchor="middle" font-size="11" fill="#a7f3d0">Operator cannot deanonymize.</text>
+  </g>
+
+  <!-- ===================== BACKEND TIER COMPONENTS ===================== -->
+  <g filter="url(#shadow)">
+    <rect x="410" y="240" width="320" height="90" rx="12" fill="url(#card)" stroke="#60a5fa" stroke-width="2"/>
+    <text x="450" y="280" text-anchor="middle" font-size="30">🌐</text>
+    <text x="570" y="270" text-anchor="middle" font-size="17" font-weight="700" fill="#f1f5f9">REST API</text>
+    <text x="570" y="290" text-anchor="middle" font-size="11" fill="#93c5fd">Express · port 3000</text>
+    <text x="570" y="310" text-anchor="middle" font-size="10" fill="#94a3b8">POST /api/vote · /force-batch</text>
+    <text x="570" y="324" text-anchor="middle" font-size="10" fill="#94a3b8">GET /api/tally · /status</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="410" y="365" width="320" height="90" rx="12" fill="url(#card)" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="450" y="405" text-anchor="middle" font-size="28">📥</text>
+    <text x="570" y="395" text-anchor="middle" font-size="17" font-weight="700" fill="#f1f5f9">Mempool</text>
+    <text x="570" y="415" text-anchor="middle" font-size="11" fill="#93c5fd">snarkjs.groth16.verify()</text>
+    <text x="570" y="432" text-anchor="middle" font-size="10" fill="#94a3b8">per-vote ZK validation</text>
+    <text x="570" y="446" text-anchor="middle" font-size="10" fill="#94a3b8">nullifier deduplication</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="410" y="490" width="320" height="90" rx="12" fill="url(#card)" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="450" y="530" text-anchor="middle" font-size="28">📦</text>
+    <text x="570" y="520" text-anchor="middle" font-size="17" font-weight="700" fill="#f1f5f9">Batcher</text>
+    <text x="570" y="540" text-anchor="middle" font-size="11" fill="#93c5fd">assembles 16-vote batches</text>
+    <text x="570" y="557" text-anchor="middle" font-size="10" fill="#94a3b8">updates state tree leaves</text>
+    <text x="570" y="571" text-anchor="middle" font-size="10" fill="#94a3b8">computes pre / post roots</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="410" y="615" width="320" height="90" rx="12" fill="url(#card)" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="450" y="655" text-anchor="middle" font-size="28">🧮</text>
+    <text x="570" y="645" text-anchor="middle" font-size="17" font-weight="700" fill="#f1f5f9">Prover</text>
+    <text x="570" y="665" text-anchor="middle" font-size="11" fill="#93c5fd">BatchStateUpdate.circom</text>
+    <text x="570" y="682" text-anchor="middle" font-size="10" fill="#94a3b8">generates state-transition proof</text>
+    <text x="570" y="696" text-anchor="middle" font-size="10" fill="#94a3b8">snarkjs · Groth16</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="410" y="740" width="320" height="90" rx="12" fill="url(#card)" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="450" y="780" text-anchor="middle" font-size="28">📤</text>
+    <text x="570" y="770" text-anchor="middle" font-size="17" font-weight="700" fill="#f1f5f9">Submitter</text>
+    <text x="570" y="790" text-anchor="middle" font-size="11" fill="#93c5fd">ethers.js · signs &amp; broadcasts</text>
+    <text x="570" y="807" text-anchor="middle" font-size="10" fill="#94a3b8">submitBatch(proof, root,</text>
+    <text x="570" y="821" text-anchor="middle" font-size="10" fill="#94a3b8">nullifiers) → L1</text>
+  </g>
+
+  <!-- Pipeline flow arrows inside backend -->
+  <line x1="570" y1="330" x2="570" y2="362" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="570" y1="455" x2="570" y2="487" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="570" y1="580" x2="570" y2="612" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <line x1="570" y1="705" x2="570" y2="737" stroke="#60a5fa" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+  <!-- ===================== DATA TIER COMPONENTS ===================== -->
+  <g filter="url(#shadow)">
+    <rect x="820" y="260" width="240" height="120" rx="12" fill="url(#card)" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="940" y="300" text-anchor="middle" font-size="32">🌲</text>
+    <text x="940" y="330" text-anchor="middle" font-size="16" font-weight="700" fill="#f1f5f9">State Tree</text>
+    <text x="940" y="349" text-anchor="middle" font-size="11" fill="#fcd34d">tally Merkle tree</text>
+    <text x="940" y="365" text-anchor="middle" font-size="10" fill="#94a3b8">5 levels · Poseidon hash</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="820" y="420" width="240" height="120" rx="12" fill="url(#card)" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="940" y="460" text-anchor="middle" font-size="32">🌳</text>
+    <text x="940" y="490" text-anchor="middle" font-size="16" font-weight="700" fill="#f1f5f9">Voter Tree</text>
+    <text x="940" y="509" text-anchor="middle" font-size="11" fill="#fcd34d">eligibility Merkle root</text>
+    <text x="940" y="525" text-anchor="middle" font-size="10" fill="#94a3b8">registered voters</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="820" y="580" width="240" height="120" rx="12" fill="url(#card)" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="940" y="620" text-anchor="middle" font-size="32">🚫</text>
+    <text x="940" y="650" text-anchor="middle" font-size="16" font-weight="700" fill="#f1f5f9">Nullifier Set</text>
+    <text x="940" y="669" text-anchor="middle" font-size="11" fill="#fcd34d">in-memory dedup</text>
+    <text x="940" y="685" text-anchor="middle" font-size="10" fill="#94a3b8">prevents double-voting</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="820" y="740" width="240" height="120" rx="12" fill="url(#card)" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="940" y="780" text-anchor="middle" font-size="32">📰</text>
+    <text x="940" y="810" text-anchor="middle" font-size="16" font-weight="700" fill="#f1f5f9">Event Log</text>
+    <text x="940" y="829" text-anchor="middle" font-size="11" fill="#fcd34d">BatchSubmitted</text>
+    <text x="940" y="845" text-anchor="middle" font-size="10" fill="#94a3b8">on-chain receipts</text>
+  </g>
+
+  <!-- ===================== BLOCKCHAIN TIER COMPONENTS ===================== -->
+  <g filter="url(#shadow)">
+    <rect x="1150" y="240" width="300" height="120" rx="12" fill="url(#card)" stroke="#f87171" stroke-width="2"/>
+    <text x="1300" y="280" text-anchor="middle" font-size="34">📜</text>
+    <text x="1300" y="312" text-anchor="middle" font-size="18" font-weight="700" fill="#f1f5f9">VotingRollupV2</text>
+    <text x="1300" y="332" text-anchor="middle" font-size="11" fill="#fca5a5">main rollup contract · Solidity 0.8</text>
+    <text x="1300" y="348" text-anchor="middle" font-size="10" fill="#94a3b8">verifies proof · advances stateRoot</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1150" y="395" width="140" height="110" rx="12" fill="url(#card)" stroke="#f87171" stroke-width="1.5"/>
+    <text x="1220" y="430" text-anchor="middle" font-size="28">✅</text>
+    <text x="1220" y="458" text-anchor="middle" font-size="13" font-weight="700" fill="#f1f5f9">VoteVerifier</text>
+    <text x="1220" y="476" text-anchor="middle" font-size="10" fill="#fca5a5">Layer 1 · Groth16</text>
+    <text x="1220" y="491" text-anchor="middle" font-size="9" fill="#94a3b8">individual proof check</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1310" y="395" width="140" height="110" rx="12" fill="url(#card)" stroke="#f87171" stroke-width="1.5"/>
+    <text x="1380" y="430" text-anchor="middle" font-size="28">✅</text>
+    <text x="1380" y="458" text-anchor="middle" font-size="13" font-weight="700" fill="#f1f5f9">BatchVerifier</text>
+    <text x="1380" y="476" text-anchor="middle" font-size="10" fill="#fca5a5">Layer 2 · Groth16</text>
+    <text x="1380" y="491" text-anchor="middle" font-size="9" fill="#94a3b8">batch state-transition</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1150" y="535" width="300" height="100" rx="12" fill="url(#card)" stroke="#f87171" stroke-width="1.5"/>
+    <text x="1300" y="572" text-anchor="middle" font-size="28">🔑</text>
+    <text x="1300" y="600" text-anchor="middle" font-size="15" font-weight="700" fill="#f1f5f9">Nullifier Registry</text>
+    <text x="1300" y="618" text-anchor="middle" font-size="10" fill="#fca5a5">on-chain mapping(uint256 ⇒ bool)</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1150" y="660" width="300" height="100" rx="12" fill="url(#card)" stroke="#f87171" stroke-width="1.5"/>
+    <text x="1300" y="697" text-anchor="middle" font-size="28">🌐</text>
+    <text x="1300" y="725" text-anchor="middle" font-size="15" font-weight="700" fill="#f1f5f9">Public State</text>
+    <text x="1300" y="743" text-anchor="middle" font-size="10" fill="#fca5a5">stateRoot · electionId · tallies</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1150" y="785" width="300" height="100" rx="12" fill="url(#card)" stroke="#f87171" stroke-width="1.5"/>
+    <text x="1300" y="822" text-anchor="middle" font-size="28">📡</text>
+    <text x="1300" y="850" text-anchor="middle" font-size="15" font-weight="700" fill="#f1f5f9">Events Emitted</text>
+    <text x="1300" y="868" text-anchor="middle" font-size="10" fill="#fca5a5">BatchSubmitted · VotingEnded</text>
+  </g>
+
+  <!-- ===================== INFRA COMPONENTS ===================== -->
+  <g filter="url(#shadow)">
+    <rect x="1545" y="260" width="190" height="100" rx="12" fill="url(#card)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="1640" y="295" text-anchor="middle" font-size="28">🔌</text>
+    <text x="1640" y="320" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f5f9">JSON-RPC</text>
+    <text x="1640" y="338" text-anchor="middle" font-size="10" fill="#c4b5fd">Hardhat / Sepolia</text>
+    <text x="1640" y="352" text-anchor="middle" font-size="10" fill="#c4b5fd">/ Infura node</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1545" y="395" width="190" height="100" rx="12" fill="url(#card)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="1640" y="430" text-anchor="middle" font-size="28">🦊</text>
+    <text x="1640" y="455" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f5f9">Ethereum Net</text>
+    <text x="1640" y="473" text-anchor="middle" font-size="10" fill="#c4b5fd">Sepolia testnet</text>
+    <text x="1640" y="487" text-anchor="middle" font-size="10" fill="#c4b5fd">/ localhost L1</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1545" y="530" width="190" height="100" rx="12" fill="url(#card)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="1640" y="565" text-anchor="middle" font-size="28">🔍</text>
+    <text x="1640" y="590" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f5f9">Etherscan</text>
+    <text x="1640" y="608" text-anchor="middle" font-size="10" fill="#c4b5fd">contract verification</text>
+    <text x="1640" y="622" text-anchor="middle" font-size="10" fill="#c4b5fd">public auditability</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1545" y="665" width="190" height="100" rx="12" fill="url(#card)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="1640" y="700" text-anchor="middle" font-size="28">🛠️</text>
+    <text x="1640" y="725" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f5f9">Hardhat</text>
+    <text x="1640" y="743" text-anchor="middle" font-size="10" fill="#c4b5fd">deploy · test · scripts</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="1545" y="800" width="190" height="100" rx="12" fill="url(#card)" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="1640" y="835" text-anchor="middle" font-size="28">📊</text>
+    <text x="1640" y="860" text-anchor="middle" font-size="14" font-weight="700" fill="#f1f5f9">Gas Benchmark</text>
+    <text x="1640" y="878" text-anchor="middle" font-size="10" fill="#c4b5fd">CSV / report output</text>
+  </g>
+
+  <!-- ===================== CROSS-TIER FLOW ARROWS ===================== -->
+  <!-- 1. Voter → Circuit (within client, drawn inside) -->
+  <line x1="190" y1="330" x2="190" y2="362" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <line x1="190" y1="455" x2="190" y2="487" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <line x1="190" y1="580" x2="190" y2="612" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- 2. Circuit → API (across tiers) -->
+  <path d="M 310 670 C 360 670, 360 285, 408 285" stroke="#34d399" stroke-width="3" fill="none" marker-end="url(#arrow-green)"/>
+  <rect x="320" y="450" width="80" height="44" rx="6" fill="#0a2820" stroke="#34d399" stroke-width="1"/>
+  <text x="360" y="468" text-anchor="middle" font-size="11" font-weight="600" fill="#34d399">① proof +</text>
+  <text x="360" y="484" text-anchor="middle" font-size="11" fill="#a7f3d0">(cand, vote)</text>
+
+  <!-- 3. Backend ↔ Data tier (bidirectional) -->
+  <path d="M 730 410 L 818 470" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <text x="760" y="430" font-size="10" fill="#fcd34d">check nullifier</text>
+
+  <path d="M 730 535 L 818 320" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <text x="745" y="395" font-size="10" fill="#fcd34d">update tallies</text>
+
+  <path d="M 730 545 L 818 480" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow-amber)"/>
+  <text x="745" y="510" font-size="10" fill="#fcd34d">read voter root</text>
+
+  <!-- 4. Submitter → Blockchain -->
+  <path d="M 730 785 C 850 785, 1000 290, 1148 290" stroke="#f87171" stroke-width="3" fill="none" marker-end="url(#arrow-red)"/>
+  <rect x="970" y="500" width="160" height="44" rx="6" fill="#2a1414" stroke="#f87171" stroke-width="1"/>
+  <text x="1050" y="520" text-anchor="middle" font-size="11" font-weight="600" fill="#f87171">② submitBatch tx</text>
+  <text x="1050" y="536" text-anchor="middle" font-size="10" fill="#fca5a5">proof · postRoot · nullifiers</text>
+
+  <!-- 5. Blockchain internal: Rollup → Verifiers -->
+  <line x1="1220" y1="362" x2="1220" y2="392" stroke="#f87171" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <line x1="1380" y1="362" x2="1380" y2="392" stroke="#f87171" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <line x1="1300" y1="505" x2="1300" y2="533" stroke="#f87171" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <line x1="1300" y1="635" x2="1300" y2="658" stroke="#f87171" stroke-width="2" marker-end="url(#arrow-red)"/>
+  <line x1="1300" y1="760" x2="1300" y2="783" stroke="#f87171" stroke-width="2" marker-end="url(#arrow-red)"/>
+
+  <!-- 6. Blockchain ↔ Infra -->
+  <path d="M 1452 300 L 1543 305" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 1452 440 L 1543 440" stroke="#a78bfa" stroke-width="2"/>
+
+  <!-- 7. Submitter goes through RPC -->
+  <path d="M 730 783 C 1450 880, 1620 740, 1620 365" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="6,4" fill="none"/>
+
+  <!-- 8. Response back to voter (dashed) -->
+  <path d="M 1148 830 C 700 1100, 350 1100, 190 870" stroke="#fbbf24" stroke-width="2" stroke-dasharray="8,4" fill="none" marker-end="url(#arrow-amber)"/>
+  <rect x="780" y="1010" width="240" height="40" rx="6" fill="#2a1f14" stroke="#fbbf24" stroke-width="1"/>
+  <text x="900" y="1028" text-anchor="middle" font-size="12" font-weight="600" fill="#fbbf24">③ tally / receipt (read events)</text>
+  <text x="900" y="1043" text-anchor="middle" font-size="10" fill="#fcd34d">getTally() · BatchSubmitted log</text>
+
+  <!-- ===================== KEY PROPERTIES STRIP ===================== -->
+  <rect x="40" y="950" width="1720" height="100" rx="14" fill="#0f1828" stroke="#475569" stroke-width="1"/>
+  <text x="60" y="980" font-size="15" font-weight="700" fill="#f1f5f9">KEY ARCHITECTURAL PROPERTIES</text>
+
+  <g transform="translate(60, 1000)">
+    <text font-size="20">🔒</text>
+    <text x="32" y="0" font-size="12" font-weight="600" fill="#34d399">Privacy</text>
+    <text x="32" y="18" font-size="10" fill="#cbd5e1">Voter secret stays on device — operator only sees (nullifier, candidate)</text>
+  </g>
+
+  <g transform="translate(420, 1000)">
+    <text font-size="20">⚡</text>
+    <text x="32" y="0" font-size="12" font-weight="600" fill="#60a5fa">Scalability</text>
+    <text x="32" y="18" font-size="10" fill="#cbd5e1">16 votes → 1 on-chain proof verification (~constant gas per batch)</text>
+  </g>
+
+  <g transform="translate(780, 1000)">
+    <text font-size="20">✅</text>
+    <text x="32" y="0" font-size="12" font-weight="600" fill="#fbbf24">Integrity</text>
+    <text x="32" y="18" font-size="10" fill="#cbd5e1">Two-layer ZK: per-vote eligibility + batched state-transition proof</text>
+  </g>
+
+  <g transform="translate(1120, 1000)">
+    <text font-size="20">🛡️</text>
+    <text x="32" y="0" font-size="12" font-weight="600" fill="#f87171">No Double-Vote</text>
+    <text x="32" y="18" font-size="10" fill="#cbd5e1">On-chain nullifier registry — rejected client-side AND on-chain</text>
+  </g>
+
+  <g transform="translate(1460, 1000)">
+    <text font-size="20">🔍</text>
+    <text x="32" y="0" font-size="12" font-weight="600" fill="#a78bfa">Auditability</text>
+    <text x="32" y="18" font-size="10" fill="#cbd5e1">All roots &amp; batches on-chain — tally fully reproducible</text>
+  </g>
+
+  <!-- ===================== FLOW LEGEND ===================== -->
+  <g transform="translate(40, 1085)">
+    <rect width="1720" height="75" rx="10" fill="#0f1828" stroke="#475569" stroke-width="1"/>
+    <text x="20" y="25" font-size="13" font-weight="700" fill="#f1f5f9">END-TO-END FLOW</text>
+
+    <g transform="translate(140, 14)">
+      <circle cx="0" cy="0" r="11" fill="#34d399"/><text x="0" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">1</text>
+      <text x="20" y="0" font-size="11" font-weight="600" fill="#34d399">Generate Proof</text>
+      <text x="20" y="14" font-size="10" fill="#94a3b8">voter signs vote with secret</text>
+      <text x="20" y="28" font-size="10" fill="#94a3b8">→ Groth16 proof produced</text>
+      <text x="20" y="42" font-size="10" fill="#94a3b8">locally in browser/CLI</text>
+    </g>
+
+    <g transform="translate(420, 14)">
+      <circle cx="0" cy="0" r="11" fill="#60a5fa"/><text x="0" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">2</text>
+      <text x="20" y="0" font-size="11" font-weight="600" fill="#60a5fa">Submit &amp; Pool</text>
+      <text x="20" y="14" font-size="10" fill="#94a3b8">POST proof to operator;</text>
+      <text x="20" y="28" font-size="10" fill="#94a3b8">mempool re-verifies and</text>
+      <text x="20" y="42" font-size="10" fill="#94a3b8">checks nullifier uniqueness</text>
+    </g>
+
+    <g transform="translate(700, 14)">
+      <circle cx="0" cy="0" r="11" fill="#fbbf24"/><text x="0" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">3</text>
+      <text x="20" y="0" font-size="11" font-weight="600" fill="#fbbf24">Batch &amp; Prove</text>
+      <text x="20" y="14" font-size="10" fill="#94a3b8">batcher updates state tree;</text>
+      <text x="20" y="28" font-size="10" fill="#94a3b8">prover generates a single</text>
+      <text x="20" y="42" font-size="10" fill="#94a3b8">batch state-transition proof</text>
+    </g>
+
+    <g transform="translate(990, 14)">
+      <circle cx="0" cy="0" r="11" fill="#f87171"/><text x="0" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">4</text>
+      <text x="20" y="0" font-size="11" font-weight="600" fill="#f87171">Verify On-Chain</text>
+      <text x="20" y="14" font-size="10" fill="#94a3b8">L1 contract verifies proof,</text>
+      <text x="20" y="28" font-size="10" fill="#94a3b8">advances stateRoot, stores</text>
+      <text x="20" y="42" font-size="10" fill="#94a3b8">nullifiers, emits event</text>
+    </g>
+
+    <g transform="translate(1290, 14)">
+      <circle cx="0" cy="0" r="11" fill="#a78bfa"/><text x="0" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b1220">5</text>
+      <text x="20" y="0" font-size="11" font-weight="600" fill="#a78bfa">Tally &amp; Audit</text>
+      <text x="20" y="14" font-size="10" fill="#94a3b8">anyone reads stateRoot or</text>
+      <text x="20" y="28" font-size="10" fill="#94a3b8">events; final tally is fully</text>
+      <text x="20" y="42" font-size="10" fill="#94a3b8">reproducible &amp; verifiable</text>
+    </g>
+  </g>
+
+</svg>

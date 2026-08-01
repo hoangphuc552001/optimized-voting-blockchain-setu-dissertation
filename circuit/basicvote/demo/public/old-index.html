@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZKER — Zero-Knowledge Rollup Voting Demo</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header id="top">
+  <div class="brand">
+    <span class="logo">ZKER</span>
+    <span class="sub">Zero-Knowledge Rollup Voting &mdash; live demonstration</span>
+  </div>
+  <div class="topmeta">
+    <span class="pill" id="pill-election">election &mdash;</span>
+    <span class="pill" id="pill-root">voter root &mdash;</span>
+    <span class="pill" id="pill-chain">chain &mdash;</span>
+    <span class="pill net" id="pill-net">&mdash;</span>
+    <button class="btn ghost" id="btn-reset" title="Redeploy contracts and clear all state">Reset election</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================== VOTER ============================== -->
+<section class="pane" id="pane-voter">
+  <h2><span class="dot v"></span>1 &middot; Voter device <em>(your browser)</em></h2>
+  <p class="note">Proving runs here, in this tab. The secret below is never sent anywhere.</p>
+
+  <label class="field">
+    <span>Voter</span>
+    <select id="sel-voter"></select>
+  </label>
+
+  <div class="candidates" id="candidates"></div>
+
+  <div class="box private">
+    <div class="boxhead">PRIVATE &mdash; never leaves this device <span class="tag red">witness only</span></div>
+    <dl id="private-view">
+      <dt>voterSecret</dt><dd id="pv-secret">&mdash;</dd>
+      <dt>merkle path</dt><dd id="pv-path">&mdash;</dd>
+    </dl>
+  </div>
+
+  <div class="box public">
+    <div class="boxhead">PUBLIC &mdash; sent to the operator <span class="tag green">5 signals</span></div>
+    <dl id="public-view">
+      <dt>nullifierHash</dt><dd id="pb-null">&mdash;</dd>
+      <dt>candidate</dt><dd id="pb-cand">&mdash;</dd>
+      <dt>vote</dt><dd id="pb-vote">&mdash;</dd>
+      <dt>voterMerkleRoot</dt><dd id="pb-root">&mdash;</dd>
+      <dt>electionId</dt><dd id="pb-eid">&mdash;</dd>
+    </dl>
+  </div>
+
+  <label class="field">
+    <span>Fault injection <em>(voter side)</em></span>
+    <select id="sel-attack">
+      <option value="none">None &mdash; honest ballot</option>
+      <optgroup label="Dies in the circuit (no proof can exist)">
+        <option value="non-binary-vote">Non-binary vote (vote = 2)</option>
+        <option value="out-of-range-candidate">Out-of-range candidate (= 7)</option>
+        <option value="ineligible-voter">Ineligible voter (secret not registered)</option>
+        <option value="forged-nullifier">Forged nullifier</option>
+      </optgroup>
+      <optgroup label="Proof is valid — dies later">
+        <option value="wrong-election-id">Cross-election replay (electionId = 999)</option>
+        <option value="forged-registry">Self-registered voter (attacker's own root)</option>
+        <option value="double-vote">Double vote (re-use this voter)</option>
+        <option value="tamper-proof">Tamper with the proof (pi_a[0] + 1)</option>
+        <option value="tamper-signal">Tamper with a public signal (candidate)</option>
+      </optgroup>
+    </select>
+  </label>
+
+  <label class="check">
+    <input type="checkbox" id="chk-malicious-op">
+    <span>Malicious operator &mdash; forward even if admission checks fail</span>
+  </label>
+
+  <button class="btn primary" id="btn-prove">Generate proof &amp; send to operator</button>
+
+  <div class="metrics" id="voter-metrics">
+    <div><b id="m-constraints">6,179</b><span>constraints</span></div>
+    <div><b id="m-provetime">&mdash;</b><span>prove time</span></div>
+    <div><b id="m-proofsize">&mdash;</b><span>proof size</span></div>
+  </div>
+
+  <pre class="term" id="voter-term">Pick a voter and a candidate to begin.</pre>
+</section>
+
+<!-- ============================ OPERATOR ============================ -->
+<section class="pane" id="pane-operator">
+  <h2><span class="dot o"></span>2 &middot; Rollup operator <em>(off-chain)</em></h2>
+  <p class="note">Collects proven votes, folds them into one state transition.</p>
+
+  <div class="box cannot">
+    <div class="boxhead">WHAT THE OPERATOR CANNOT SEE</div>
+    <ul class="cannotlist">
+      <li><s>voterSecret</s></li>
+      <li><s>Merkle path / tree position</s></li>
+      <li><s>which registered voter cast this ballot</s></li>
+    </ul>
+  </div>
+
+  <div class="mempool">
+    <div class="boxhead">Mempool <span class="tag" id="mempool-count">0 / 16</span></div>
+    <div id="mempool-list" class="mplist"><div class="empty">empty</div></div>
+  </div>
+
+  <div class="box checks">
+    <div class="boxhead">Admission checks &mdash; last submission</div>
+    <ul id="check-list"><li class="muted">no submission yet</li></ul>
+  </div>
+
+  <details class="opattacks">
+    <summary>Operator-side faults</summary>
+    <label class="check"><input type="checkbox" id="op-censor"><span>Censor vote #<input type="number" id="op-censor-idx" min="0" value="0" class="mini"> (drop it silently)</span></label>
+    <label class="check"><input type="checkbox" id="op-swap"><span>Re-route vote #<input type="number" id="op-swap-idx" min="0" value="0" class="mini"> to candidate <input type="number" id="op-swap-to" min="0" max="4" value="4" class="mini"></span></label>
+    <label class="check"><input type="checkbox" id="op-inflate"><span>Inflate the tally by +1 phantom vote</span></label>
+    <label class="check"><input type="checkbox" id="op-tamper"><span>Tamper with the batch proof before submitting</span></label>
+  </details>
+
+  <div class="btnrow">
+    <button class="btn ghost small" id="btn-prefill" title="Generate real Layer-1 proofs server-side for voters you haven't played by hand">Fill batch with simulated devices</button>
+    <input type="number" id="prefill-count" class="mini" min="1" max="16" value="16" title="How many ballots to add">
+  </div>
+  <button class="btn primary" id="btn-batch">Assemble batch &amp; submit to L1</button>
+
+  <div class="metrics">
+    <div><b>100,116</b><span>constraints</span></div>
+    <div><b id="m-batchtime">&mdash;</b><span>prove time</span></div>
+    <div><b id="m-batchsize">&mdash;</b><span>proof size</span></div>
+  </div>
+
+  <pre class="term" id="op-term">Waiting for votes.</pre>
+</section>
+
+<!-- ============================== CHAIN ============================== -->
+<section class="pane" id="pane-chain">
+  <h2><span class="dot c"></span>3 &middot; Ethereum L1 <em>(VotingRollupV2)</em></h2>
+  <p class="note">The only trust anchor. Verifies every batch proof in full.</p>
+
+  <dl class="chainstate">
+    <dt>stateRoot</dt><dd id="cs-root">&mdash;</dd>
+    <dt>batchCount</dt><dd id="cs-batches">0</dd>
+    <dt>nullifiers registered</dt><dd id="cs-nulls">0</dd>
+    <dt>votingActive</dt><dd id="cs-active">&mdash;</dd>
+    <dt>operator root matches</dt><dd id="cs-sync">&mdash;</dd>
+  </dl>
+
+  <div class="box">
+    <div class="boxhead">Batches on chain <span class="tag" id="batch-hint">click to inspect</span></div>
+    <div id="batch-list" class="mplist"><div class="empty">none yet</div></div>
+  </div>
+
+  <div class="box" id="contracts-box">
+    <div class="boxhead">Deployed contracts</div>
+    <div id="contract-links" class="mplist"><div class="empty">loading…</div></div>
+  </div>
+
+  <div class="box">
+    <div class="boxhead">Gas per vote <span class="tag" id="gas-sample">&mdash;</span></div>
+    <div id="gas-bars" class="bars"><div class="empty">submit a batch, then measure</div></div>
+    <button class="btn ghost" id="btn-baselines">Measure baselines (per-vote ZK &amp; non-ZK)</button>
+  </div>
+
+  <div class="box" id="sepolia-box">
+    <div class="boxhead">On public Ethereum <span class="tag green">Sepolia</span></div>
+    <p class="note">The same pipeline, already mined on a real network. Verified links &mdash; open any of them.</p>
+    <div id="sepolia-list" class="mplist"><div class="empty">loading…</div></div>
+  </div>
+
+  <div class="box">
+    <div class="boxhead">External observer</div>
+    <p class="note">Re-verify a batch from chain calldata alone &mdash; no operator involved.</p>
+    <button class="btn ghost" id="btn-observe">Independently verify latest batch</button>
+    <ul id="observer-list"><li class="muted">not run</li></ul>
+  </div>
+
+  <div class="box">
+    <div class="boxhead">Lifecycle &amp; contract-level attacks</div>
+    <div class="btnrow">
+      <button class="btn ghost small" id="btn-end">End voting (admin)</button>
+      <button class="btn danger small" id="btn-end-nonadmin">End voting as non-admin</button>
+      <button class="btn danger small" id="btn-zero">Deploy with zero verifier</button>
+      <button class="btn danger small" id="btn-replay">Replay latest batch</button>
+    </div>
+    <ul id="lifecycle-list"><li class="muted">no action yet</li></ul>
+  </div>
+
+  <pre class="term" id="chain-term">No transactions yet.</pre>
+</section>
+
+</main>
+
+<!-- ============================= EXPLORER ============================= -->
+<section id="explorer">
+  <div class="exphead">
+    <h3>Block explorer</h3>
+    <span class="note">Everything below is read from the node over <code>eth_*</code> RPC. No operator involved &mdash; an external observer sees exactly this.</span>
+    <div class="expmeta">
+      <span class="pill" id="exp-chain">&mdash;</span>
+      <span class="pill" id="exp-head">&mdash;</span>
+      <button class="btn ghost small" id="btn-exp-refresh">refresh</button>
+    </div>
+  </div>
+
+  <div class="expgrid">
+    <div class="expcol">
+      <div class="boxhead">Transactions <span class="tag" id="exp-txcount">&mdash;</span></div>
+      <div id="exp-txlist" class="mplist tall"><div class="empty">loading…</div></div>
+
+      <div class="boxhead" style="margin-top:14px">Blocks</div>
+      <div id="exp-blocklist" class="mplist"><div class="empty">loading…</div></div>
+
+      <div class="boxhead" style="margin-top:14px">Contracts</div>
+      <div id="exp-contracts" class="mplist"><div class="empty">loading…</div></div>
+    </div>
+
+    <div class="expcol wide">
+      <div class="boxhead">Transaction detail</div>
+      <div id="exp-detail"><div class="empty">select a transaction on the left</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LADDER ============================== -->
+<section id="ladder-wrap">
+  <div class="ladderhead">
+    <h3>Defence ladder</h3>
+    <span class="note" id="ladder-caption">An attack dies at the lowest rung that can catch it. The lower it dies, the stronger the guarantee.</span>
+  </div>
+  <div class="ladder">
+    <div class="rung" data-rung="L3"><b>L3</b><span>Ethereum L1</span><em>require() guards</em></div>
+    <div class="rung" data-rung="L2"><b>L2</b><span>Batch circuit</span><em>state &amp; nullifier constraints</em></div>
+    <div class="rung" data-rung="L1"><b>L1</b><span>Operator</span><em>snarkjs verify, mempool</em></div>
+    <div class="rung" data-rung="L0"><b>L0</b><span>Voter circuit</span><em>witness generation</em></div>
+    <div class="rung none" data-rung="NONE"><b>&#9888;</b><span>Not caught</span><em>known limitation</em></div>
+  </div>
+</section>
+
+<footer>
+  <div class="logbar"><b>Event log</b><button class="btn ghost small" id="btn-clearlog">clear</button></div>
+  <pre id="eventlog"></pre>
+</footer>
+
+<script src="/vendor/snarkjs.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

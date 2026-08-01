@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>ZK-Vote | Voter Terminal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#004395",
+                        "on-background": "#e0e3e5",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-tertiary-container": "#1f2a3c",
+                        "surface": "#101415",
+                        "outline-variant": "#424754",
+                        "on-primary": "#002e6a",
+                        "on-primary-fixed": "#001a42",
+                        "on-surface": "#e0e3e5",
+                        "surface-container-high": "#272a2c",
+                        "inverse-on-surface": "#2d3133",
+                        "primary": "#adc6ff",
+                        "secondary-container": "#3f465c",
+                        "tertiary-container": "#8691a7",
+                        "surface-container": "#1d2022",
+                        "error": "#ffb4ab",
+                        "secondary": "#bec6e0",
+                        "on-secondary": "#283044",
+                        "on-secondary-container": "#adb4ce",
+                        "tertiary": "#bcc7de",
+                        "surface-variant": "#323537",
+                        "on-tertiary-fixed": "#111c2d",
+                        "on-tertiary": "#263143",
+                        "tertiary-fixed": "#d8e3fb",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "outline": "#8c909f",
+                        "tertiary-fixed-dim": "#bcc7de",
+                        "inverse-primary": "#005ac2",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "surface-container-low": "#191c1e",
+                        "surface-bright": "#363a3b",
+                        "on-tertiary-fixed-variant": "#3c475a",
+                        "surface-container-highest": "#323537",
+                        "inverse-surface": "#e0e3e5",
+                        "secondary-fixed": "#dae2fd",
+                        "surface-dim": "#101415",
+                        "surface-container-lowest": "#0b0f10",
+                        "on-primary-container": "#00285d",
+                        "primary-fixed": "#d8e2ff",
+                        "primary-container": "#4d8eff",
+                        "surface-tint": "#adc6ff",
+                        "on-surface-variant": "#c2c6d6",
+                        "background": "#101415",
+                        "primary-fixed-dim": "#adc6ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "mono-label": ["JetBrains Mono"],
+                        "mono-code": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "mono-label": ["13px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "mono-code": ["12px", {"lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            background: rgba(16, 20, 21, 0.8);
+            border: 1px solid #334155;
+        }
+        .proof-progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-screen w-[240px] border-r border-outline-variant bg-surface flex flex-col z-50">
+    <div class="p-6">
+        <h1 class="font-headline-md text-headline-md font-bold text-primary">ZK-Vote Alpha</h1>
+        <p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">Protocol v1.0.4</p>
+    </div>
+    <nav class="flex-1 px-3 space-y-1">
+        <!-- Voter Terminal (Active) -->
+        <a class="flex items-center gap-3 px-3 py-3 text-primary font-bold border-r-2 border-primary bg-surface-variant/30 transition-colors" href="#">
+            <span class="material-symbols-outlined">how_to_vote</span>
+            <span class="font-body-md">Voter Terminal</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-colors" href="#">
+            <span class="material-symbols-outlined">settings_input_component</span>
+            <span class="font-body-md">Operator Console</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-colors" href="#">
+            <span class="material-symbols-outlined">view_list</span>
+            <span class="font-body-md">Mempool</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-colors" href="#">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="font-body-md">Block Explorer</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 text-on-surface-variant hover:bg-surface-variant transition-colors" href="#">
+            <span class="material-symbols-outlined">security</span>
+            <span class="font-body-md">Attack Panel</span>
+        </a>
+    </nav>
+    <div class="p-4 border-t border-outline-variant">
+        <button class="w-full bg-primary-container text-on-primary-container font-bold py-3 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all" onclick="simulateProof()">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">generating_tokens</span>
+            Generate Proof
+        </button>
+    </div>
+    <div class="px-3 pb-6 space-y-1">
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant transition-colors" href="#">
+            <span class="material-symbols-outlined">description</span>
+            <span class="font-body-md">Docs</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-variant transition-colors" href="#">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="font-body-md">Logout</span>
+        </a>
+    </div>
+</aside>
+<!-- Main Content Area -->
+<div class="ml-[240px] flex flex-col min-h-screen">
+    <!-- TopNavBar -->
+    <header class="sticky top-0 z-40 bg-surface border-b border-outline-variant h-16 flex justify-between items-center px-8 w-full">
+        <div class="flex items-center gap-4">
+            <span class="font-headline-md text-headline-md font-bold text-primary">ZK-Vote Dashboard</span>
+            <div class="flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full border border-outline-variant">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="font-mono-label text-mono-label text-on-surface">Active</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2 font-mono-label text-mono-label text-on-surface-variant">
+                <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                0x8f...2a41
+                <span class="text-green-400">Connected</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="text-on-surface-variant hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="text-on-surface-variant hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined">settings</span>
+                </button>
+                <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+                    <img class="w-full h-full object-cover" data-alt="A professional cryptographic identity avatar with geometric patterns in deep blue and slate grey, suggesting a secure digital profile for a blockchain developer or security engineer." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBruCnNGTcTGXQSQ0OfwxQQEH_pfPxoCXG8LsbJ-SPCYIHq6GkO3gb1GQkNv2xvX3wf8qSLky9_hSjEr59ImohAttFSciNa-V7GokB17yTA1rbt1dycY6hujJ39CyE1SNz-VrEscki90q0DFwtNouBpFMCLKcgsOc0QXxyGCjpK65nfY0HKKbRjwt_A-olGkMy6J977R8wGwFk72hb_fpr0jX0Gzl2bxdhNT8421bXgAKE_8at9X8HtGw"/>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Dashboard Grid -->
+    <main class="p-8 grid grid-cols-12 gap-gutter max-w-container-max mx-auto w-full">
+        <!-- Left: Voter Registration -->
+        <section class="col-span-12 lg:col-span-4 flex flex-col gap-gutter">
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-headline-md text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined">fingerprint</span>
+                        Voter Identity
+                    </h3>
+                    <span class="font-mono-label text-mono-label text-on-surface-variant bg-surface-variant px-2 py-1 rounded">5 Registered</span>
+                </div>
+                <div class="space-y-3">
+                    <!-- Identity Item -->
+                    <div class="group p-4 bg-surface-container-low border border-outline-variant rounded-lg hover:border-primary cursor-pointer transition-all active:scale-[0.98]">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-body-md font-bold">Admin Root Key</p>
+                                <p class="font-mono-code text-mono-code text-on-surface-variant mt-1">Hash: zkv_928...4ff0</p>
+                            </div>
+                            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        </div>
+                    </div>
+                    <div class="group p-4 bg-surface border border-outline-variant rounded-lg hover:border-primary cursor-pointer transition-all opacity-60">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-body-md font-bold text-on-surface">Anonymous_812</p>
+                                <p class="font-mono-code text-mono-code text-on-surface-variant mt-1">Hash: zkv_114...a9c2</p>
+                            </div>
+                            <span class="material-symbols-outlined text-on-surface-variant">radio_button_unchecked</span>
+                        </div>
+                    </div>
+                    <div class="group p-4 bg-surface border border-outline-variant rounded-lg hover:border-primary cursor-pointer transition-all opacity-60">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-body-md font-bold text-on-surface">Proxy_Validator_A</p>
+                                <p class="font-mono-code text-mono-code text-on-surface-variant mt-1">Hash: zkv_ef5...d411</p>
+                            </div>
+                            <span class="material-symbols-outlined text-on-surface-variant">radio_button_unchecked</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-surface-container-high border border-outline-variant rounded-xl p-6 relative overflow-hidden h-48">
+
+                <div class="relative z-10 h-full flex flex-col justify-end">
+                    <p class="font-mono-label text-mono-label uppercase tracking-widest text-primary mb-2">Network Health</p>
+                    <p class="font-headline-md text-on-surface">99.9% Decentralized</p>
+                    <p class="font-body-sm text-on-surface-variant">2,048 Active Nodes</p>
+                </div>
+            </div>
+        </section>
+        <!-- Center: Cast Ballot & Proof Console -->
+        <section class="col-span-12 lg:col-span-8 flex flex-col gap-gutter">
+            <!-- Cast Ballot -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-6">
+                <h3 class="font-headline-md text-primary mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined">ballot</span>
+                    Cast Ballot: Proposal #128
+                </h3>
+                <p class="text-on-surface-variant font-body-md mb-8">Select a candidate for the Protocol Steering Committee. Your vote is anonymized via Groth16 zk-SNARKs.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <button class="candidate-btn flex items-center gap-4 p-4 border border-outline-variant rounded-xl hover:border-primary text-left transition-all bg-surface hover:bg-surface-variant group relative overflow-hidden" onclick="selectCandidate(this)">
+                        <div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">person</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-on-surface">Dr. Elena Rostova</h4>
+                            <p class="text-body-sm text-on-surface-variant">Consensus Specialist</p>
+                        </div>
+                        <span class="material-symbols-outlined absolute right-4 top-4 text-primary opacity-0 group-[.selected]:opacity-100 transition-opacity" style="font-variation-settings: 'FILL' 1;">verified</span>
+                    </button>
+                    <button class="candidate-btn flex items-center gap-4 p-4 border border-outline-variant rounded-xl hover:border-primary text-left transition-all bg-surface hover:bg-surface-variant group relative overflow-hidden" onclick="selectCandidate(this)">
+                        <div class="w-12 h-12 rounded-lg bg-surface-variant flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined">terminal</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-on-surface">0xCore_Developer</h4>
+                            <p class="text-body-sm text-on-surface-variant">L2 Infrastructure</p>
+                        </div>
+                        <span class="material-symbols-outlined absolute right-4 top-4 text-primary opacity-0 group-[.selected]:opacity-100 transition-opacity" style="font-variation-settings: 'FILL' 1;">verified</span>
+                    </button>
+                </div>
+                <!-- Proof Generation Area -->
+                <div class="hidden border-t border-outline-variant pt-8 transition-all animate-in fade-in duration-500" id="proof-container">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-mono-label text-mono-label text-on-surface-variant flex items-center gap-2">
+                            <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                            CLIENT-SIDE PROOF GENERATION (VoteProof.wasm)
+                        </h4>
+                        <span class="font-mono-code text-mono-code text-primary" id="proof-percent">0%</span>
+                    </div>
+                    <div class="w-full h-1 bg-surface-variant rounded-full mb-6 overflow-hidden">
+                        <div class="h-full bg-primary w-0 proof-progress-bar" id="proof-progress"></div>
+                    </div>
+                    <!-- Console Output -->
+                    <div class="bg-black/40 rounded-lg p-4 font-mono-code text-mono-code space-y-2 max-h-48 overflow-y-auto" id="console-logs">
+                        <p class="text-green-400">[INIT] Loading wasm binary...</p>
+                        <p class="text-on-surface-variant">[DATA] Fetched Merkle Root: 0x821...91a</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-4 mt-8">
+                    <button class="px-6 py-2 border border-outline-variant rounded-lg text-on-surface-variant hover:bg-surface-variant transition-all font-bold">Discard</button>
+                    <button class="px-10 py-2 bg-primary text-on-primary font-extrabold rounded-lg hover:shadow-lg hover:shadow-primary/20 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed" id="main-action-btn" onclick="simulateProof()">
+                        Generate &amp; Submit Proof
+                    </button>
+                </div>
+            </div>
+            <!-- Recent Activity Logs -->
+            <div class="bg-surface-container border border-outline-variant rounded-xl p-6">
+                <h3 class="font-headline-md text-on-surface-variant mb-6 text-sm uppercase tracking-widest">Local Transaction History</h3>
+                <div class="space-y-0">
+                    <div class="grid grid-cols-12 py-3 border-b border-outline-variant text-mono-code hover:bg-surface-variant/20 transition-colors">
+                        <div class="col-span-1 text-primary">
+                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                        </div>
+                        <div class="col-span-3 text-on-surface">Vote Submitted</div>
+                        <div class="col-span-5 text-on-surface-variant truncate">0x5f21...ae90 (Nullifier)</div>
+                        <div class="col-span-3 text-right text-on-surface-variant">2 mins ago</div>
+                    </div>
+                    <div class="grid grid-cols-12 py-3 border-b border-outline-variant text-mono-code hover:bg-surface-variant/20 transition-colors">
+                        <div class="col-span-1 text-primary">
+                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                        </div>
+                        <div class="col-span-3 text-on-surface">Identity Registered</div>
+                        <div class="col-span-5 text-on-surface-variant truncate">zkv_928...4ff0 (Identity)</div>
+                        <div class="col-span-3 text-right text-on-surface-variant">1 hour ago</div>
+                    </div>
+                    <div class="grid grid-cols-12 py-3 text-mono-code hover:bg-surface-variant/20 transition-colors">
+                        <div class="col-span-1 text-error">
+                            <span class="material-symbols-outlined text-[16px]">cancel</span>
+                        </div>
+                        <div class="col-span-3 text-on-surface">Connection Reset</div>
+                        <div class="col-span-5 text-on-surface-variant truncate">Internal Relay Error 503</div>
+                        <div class="col-span-3 text-right text-on-surface-variant">3 hours ago</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<!-- Proof Overlay (Success State) -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-6 hidden" id="success-overlay">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+    <div class="glass-panel max-w-xl w-full p-8 rounded-2xl relative z-10 border-primary/30 shadow-2xl">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mb-6 border border-primary/40">
+                <span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">format_image_left</span>
+            </div>
+            <h2 class="font-headline-lg text-headline-lg text-primary mb-2">Transaction Finalized</h2>
+            <p class="text-on-surface-variant mb-8">Proof successfully submitted to the Operator mempool. Your vote is now cryptographically immutable.</p>
+            <div class="w-full bg-black/40 rounded-xl p-6 font-mono-code text-left mb-8 space-y-4">
+                <div>
+                    <p class="text-primary text-[10px] uppercase mb-1">Generated Nullifier</p>
+                    <p class="text-on-surface break-all">0x7f23c9a1b4e2d6f8319203847562019ab73c21a0987162534de231fc81</p>
+                </div>
+                <div>
+                    <p class="text-primary text-[10px] uppercase mb-1">Groth16 ZK-Proof (A, B, C)</p>
+                    <p class="text-on-surface-variant text-[11px] leading-relaxed line-clamp-3">
+                        [0x192...881a, 0x552...ef11, 0xcc4...99a1, 0x112...dd3e, 0x889...00b2, 0xfe4...119c, 0xaa2...bb5d, 0x334...9182]
+                    </p>
+                </div>
+            </div>
+            <button class="w-full py-4 bg-primary text-on-primary font-bold rounded-lg hover:scale-[1.02] active:scale-95 transition-all" onclick="closeSuccess()">Return to Terminal</button>
+        </div>
+    </div>
+</div>
+<script>
+    let isSimulating = false;
+
+    function selectCandidate(el) {
+        document.querySelectorAll('.candidate-btn').forEach(btn => btn.classList.remove('selected', 'border-primary', 'bg-surface-variant/40'));
+        el.classList.add('selected', 'border-primary', 'bg-surface-variant/40');
+    }
+
+    function addLog(text, color = 'text-on-surface-variant') {
+        const consoleLogs = document.getElementById('console-logs');
+        const p = document.createElement('p');
+        p.className = color;
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+        consoleLogs.appendChild(p);
+        consoleLogs.scrollTop = consoleLogs.scrollHeight;
+    }
+
+    async function simulateProof() {
+        if (isSimulating) return;
+
+        const btn = document.getElementById('main-action-btn');
+        const container = document.getElementById('proof-container');
+        const progress = document.getElementById('proof-progress');
+        const percent = document.getElementById('proof-percent');
+
+        container.classList.remove('hidden');
+        isSimulating = true;
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+
+        addLog("Starting ZKP Witness generation...", "text-primary");
+
+        const steps = [
+            { p: 15, log: "Loading circuits into memory..." },
+            { p: 30, log: "Computing polynomial commitment..." },
+            { p: 55, log: "Synthesizing constraints (2^20 gates)...", color: "text-amber-400" },
+            { p: 75, log: "Generating Groth16 Snark Proof...", color: "text-primary" },
+            { p: 90, log: "Verifying locally against Merkle Root..." },
+            { p: 100, log: "Broadcasting Nullifier to Operator...", color: "text-green-400" }
+        ];
+
+        for (const step of steps) {
+            await new Promise(r => setTimeout(r, 600 + Math.random() * 800));
+            progress.style.width = step.p + "%";
+            percent.textContent = step.p + "%";
+            addLog(step.log, step.color);
+        }
+
+        setTimeout(() => {
+            document.getElementById('success-overlay').classList.remove('hidden');
+        }, 500);
+    }
+
+    function closeSuccess() {
+        document.getElementById('success-overlay').classList.add('hidden');
+        document.getElementById('proof-container').classList.add('hidden');
+        document.getElementById('proof-progress').style.width = "0%";
+        document.getElementById('proof-percent').textContent = "0%";
+        const btn = document.getElementById('main-action-btn');
+        btn.disabled = false;
+        btn.textContent = "Generate & Submit Proof";
+        isSimulating = false;
+    }
+</script>
+</body></html>

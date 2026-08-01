@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-06-19T10:19:54.597Z",
+  "circuit": "VoteProof(treeLevels=10, candidates=5)",
+  "constraints": 6179,
+  "runs": 10,
+  "ptau": "pot16_final.ptau",
+  "groth16": {
+    "setupMs": 2670.0821,
+    "scheme": "Groth16",
+    "proveMeanMs": 215.0561099999999,
+    "proveStdMs": 35.52438107816801,
+    "proveMinMs": 185.67599999999948,
+    "proveMaxMs": 314.3793999999998,
+    "verifyMeanMs": 8.425979999999981,
+    "verifyStdMs": 1.3449781320155627,
+    "proofSizeBytes": 724,
+    "vkeySizeBytes": 3257,
+    "verified": true
+  },
+  "plonk": {
+    "setupMs": 640.3908999999999,
+    "scheme": "PLONK",
+    "proveMeanMs": 2742.5570999999995,
+    "proveStdMs": 23.842211830532136,
+    "proveMinMs": 2692.4697000000015,
+    "proveMaxMs": 2779.565700000001,
+    "verifyMeanMs": 8.303510000000824,
+    "verifyStdMs": 0.464373266780999,
+    "proofSizeBytes": 2101,
+    "vkeySizeBytes": 1858,
+    "verified": true
+  }
+}

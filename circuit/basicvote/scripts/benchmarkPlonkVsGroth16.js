@@ -256,7 +256,7 @@ async function main() {
     console.log(`Circuit: VoteProof(treeLevels=10, candidates=5)`);
     console.log(`Timed runs per scheme: ${N}\n`);
 
-    const info = await snarkjs.r1cs.info(R1CS);
+    const info = await snarkjs.r1cs.info(R1C);
     const meta = { constraints: info.nConstraints };
 
     const setup = await runSetup();

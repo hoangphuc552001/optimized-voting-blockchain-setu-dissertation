@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZK-Vote — Zero-Knowledge Rollup Voting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ================================ SIDE NAV ================================ -->
+<aside id="sidenav">
+  <div class="navbrand">
+    <h1>ZK-Vote</h1>
+    <p>ZKER two-layer rollup</p>
+  </div>
+
+  <nav class="navlinks">
+    <button class="navlink on" data-view="voter">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 15h18M6 15V9l6-4 6 4v6M9 19h6"/><path d="M10 12l1.5 1.5L15 10"/></svg>
+      <span>Voter Terminal</span>
+    </button>
+    <button class="navlink" data-view="operator">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+      <span>Operator Console</span>
+    </button>
+    <button class="navlink" data-view="mempool">
+      <svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      <span>Mempool</span>
+      <span class="badge" id="nav-mempool">0</span>
+    </button>
+    <button class="navlink" data-view="ledger">
+      <svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+      <span>Ledger &middot; L1</span>
+      <span class="badge" id="nav-batches">0</span>
+    </button>
+    <button class="navlink" data-view="explorer">
+      <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Block Explorer</span>
+    </button>
+    <button class="navlink" data-view="attack">
+      <svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+      <span>Attack Panel</span>
+      <span class="badge" id="nav-fault">off</span>
+    </button>
+  </nav>
+
+  <div class="navcta">
+    <button class="btn primary block" id="nav-cta">
+      <svg class="i sm" viewBox="0 0 24 24"><path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z"/></svg>
+      <span id="nav-cta-label">Generate Proof</span>
+    </button>
+  </div>
+
+  <div class="navfoot">
+    <a href="https://sepolia.etherscan.io/address/0x69FA7d7Ef06351da557197d50e1505aeF97aD04e" target="_blank" rel="noopener">
+      <svg class="i sm" viewBox="0 0 24 24"><path d="M14 3h7v7M21 3l-9 9M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+      <span>Sepolia contract</span>
+    </a>
+    <a href="#" id="btn-reset" title="Redeploy contracts and clear all state">
+      <svg class="i sm" viewBox="0 0 24 24"><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
+      <span>Reset election</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ================================== SHELL ================================= -->
+<div id="shell">
+
+<header id="topbar">
+  <div class="topleft">
+    <button class="iconbtn" id="btn-menu" title="Menu">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <h2 id="view-title">Voter Terminal</h2>
+    <span class="livepill" id="pill-net"><span class="dot live"></span><span>&mdash;</span></span>
+  </div>
+  <div class="topright">
+    <span class="stat" id="pill-election">election <b>&mdash;</b></span>
+    <span class="stat" id="pill-root">root <b>&mdash;</b></span>
+    <span class="stat" id="pill-chain">chain <b>&mdash;</b></span>
+    <button class="iconbtn" id="btn-log-toggle" title="Event log">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    </button>
+    <button class="iconbtn" id="btn-exp-refresh" title="Refresh chain data">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 019-9 9 9 0 016.7 3M21 12a9 9 0 01-9 9 9 9 0 01-6.7-3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============================== VOTER TERMINAL ============================= -->
+<section class="view on" id="view-voter">
+  <div class="viewhead">
+    <h3>Voter device <span class="domain v">trust domain 1 &middot; your browser</span></h3>
+    <p>Proving runs in this tab. The secret below is used to build a witness here and is never sent anywhere &mdash; the server receives only a proof and five public signals.</p>
+  </div>
+
+  <div class="grid c12">
+    <!-- identity -->
+    <div class="col4 stack">
+      <div class="card">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><path d="M12 11a3 3 0 100-6 3 3 0 000 6z"/><path d="M6.5 20a5.5 5.5 0 0111 0"/><path d="M4 8a8 8 0 0116 0"/></svg>
+            Voter identity
+          </h4>
+          <span class="chip spacer" id="voter-count">&mdash;</span>
+        </div>
+        <div class="idlist" id="sel-voter-list"></div>
+        <label class="field" style="margin:14px 0 0">
+          <span class="lbl">or pick from the list</span>
+          <select id="sel-voter"></select>
+        </label>
+      </div>
+
+      <div class="card tint-v">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+          Private &mdash; stays here
+        </h4></div>
+        <dl class="kv">
+          <dt>voterSecret</dt><dd id="pv-secret">&mdash;</dd>
+          <dt>merkle path</dt><dd id="pv-path">&mdash;</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          Circuit
+        </h4></div>
+        <div class="metrics">
+          <div><b id="m-constraints">6,179</b><span>constraints</span></div>
+          <div><b id="m-provetime">&mdash;</b><span>prove time</span></div>
+          <div><b id="m-proofsize">&mdash;</b><span>proof size</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ballot -->
+    <div class="col8 stack">
+      <div class="card">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+            Cast ballot
+          </h4>
+          <span class="chip spacer" id="ballot-fault">honest ballot</span>
+        </div>
+        <p class="sub">Pick a candidate. Your choice is proven eligible and well-formed without revealing who you are.</p>
+
+        <div class="candgrid" id="candidates"></div>
+
+        <div class="split" style="margin-top:18px">
+          <div class="wbox pub">
+            <h5>Public &mdash; sent to the operator <span class="chip ok">5 signals</span></h5>
+            <dl class="kv">
+              <dt>nullifier</dt><dd id="pb-null">&mdash;</dd>
+              <dt>candidate</dt><dd id="pb-cand">&mdash;</dd>
+              <dt>vote</dt><dd id="pb-vote">&mdash;</dd>
+              <dt>voterRoot</dt><dd id="pb-root">&mdash;</dd>
+              <dt>electionId</dt><dd id="pb-eid">&mdash;</dd>
+            </dl>
+          </div>
+          <div class="wbox priv">
+            <h5>What nobody else learns</h5>
+            <ul class="cannot">
+              <li><s>which registered voter this is</s></li>
+              <li><s>the secret behind the nullifier</s></li>
+              <li><s>the position in the eligibility tree</s></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="progwrap" id="proof-container" style="display:none">
+          <div class="proghead">
+            <span class="stage">
+              <svg class="i sm spin" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.2-8.6"/></svg>
+              <span id="proof-stage">CLIENT-SIDE PROOF GENERATION (VoteProof.wasm)</span>
+            </span>
+            <span id="proof-percent">&mdash;</span>
+          </div>
+          <div class="progtrack indet" id="proof-track"><div class="progfill" id="proof-progress"></div></div>
+        </div>
+
+        <div class="btnrow" style="margin-top:18px; justify-content:flex-end">
+          <label class="check" style="margin-right:auto">
+            <input type="checkbox" id="chk-malicious-op">
+            <span>Malicious operator &mdash; forward even if admission checks fail</span>
+          </label>
+          <button class="btn ghost" id="btn-discard">Reset ballot</button>
+          <button class="btn primary" id="btn-prove">Generate &amp; submit proof</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>
+          Local proof console
+        </h4></div>
+        <pre class="term" id="voter-term">Pick a voter and a candidate to begin.</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= OPERATOR CONSOLE ============================ -->
+<section class="view" id="view-operator">
+  <div class="viewhead">
+    <h3>Rollup operator <span class="domain o">trust domain 2 &middot; off-chain</span></h3>
+    <p>Collects already-proven ballots and folds them into a single state transition. It has liveness power only &mdash; it can delay a vote, but it cannot forge, alter or drop one without the batch proof failing.</p>
+  </div>
+
+  <div class="grid c12">
+    <div class="col5 stack">
+      <div class="card tint-e">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8"/><path d="M9.4 5.2A9.6 9.6 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.4 3.6M6.3 6.6C3.9 8.2 3 10.6 3 12c0 2.5 4 7 9 7 1.2 0 2.3-.2 3.3-.6"/></svg>
+          What the operator cannot see
+        </h4></div>
+        <ul class="cannot">
+          <li><s>voterSecret</s></li>
+          <li><s>Merkle path / tree position</s></li>
+          <li><s>which registered voter cast this ballot</s></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h9"/></svg>
+            Batch queue
+          </h4>
+          <span class="chip spacer" id="mempool-count">0 / 16</span>
+        </div>
+        <div class="btnrow" style="margin-bottom:14px">
+          <button class="btn ghost small" id="btn-prefill" title="Generate real Layer-1 proofs server-side for voters you haven't played by hand">Fill with simulated devices</button>
+          <input type="number" id="prefill-count" class="mini" min="1" max="16" value="16" title="How many ballots to add">
+        </div>
+        <button class="btn primary block" id="btn-batch">Assemble batch &amp; submit to L1</button>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+          Batch circuit
+        </h4></div>
+        <div class="metrics">
+          <div><b>100,116</b><span>constraints</span></div>
+          <div><b id="m-batchtime">&mdash;</b><span>prove time</span></div>
+          <div><b id="m-batchsize">&mdash;</b><span>proof size</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col7 stack">
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>
+          Pipeline
+        </h4></div>
+        <pre class="term" id="op-term">Waiting for votes.</pre>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V6l8-3z"/></svg>
+          Operator-side faults
+        </h4></div>
+        <p class="sub">A dishonest operator. Each of these is applied to the batch before it is proven.</p>
+        <label class="check"><input type="checkbox" id="op-censor"><span>Censor vote #<input type="number" id="op-censor-idx" min="0" value="0" class="mini"> (drop it silently)</span></label>
+        <label class="check"><input type="checkbox" id="op-swap"><span>Re-route vote #<input type="number" id="op-swap-idx" min="0" value="0" class="mini"> to candidate <input type="number" id="op-swap-to" min="0" max="4" value="4" class="mini"></span></label>
+        <label class="check"><input type="checkbox" id="op-inflate"><span>Inflate the tally by +1 phantom vote</span></label>
+        <label class="check"><input type="checkbox" id="op-tamper"><span>Tamper with the batch proof before submitting</span></label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================= MEMPOOL ================================= -->
+<section class="view" id="view-mempool">
+  <div class="viewhead">
+    <h3>Mempool <span class="domain o">trust domain 2 &middot; off-chain</span></h3>
+    <p>Proven ballots waiting to be batched, and the admission checks the operator ran on the most recent one.</p>
+  </div>
+
+  <div class="grid c12">
+    <div class="col6 stack">
+      <div class="card">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h9"/></svg>
+            Pending ballots
+          </h4>
+          <span class="chip spacer" id="mempool-count-2">0 / 16</span>
+        </div>
+        <div id="mempool-list" class="rows tall"><div class="empty">empty</div></div>
+      </div>
+    </div>
+
+    <div class="col6 stack">
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+          Admission checks &mdash; last submission
+        </h4></div>
+        <ul class="checks" id="check-list"><li class="muted">no submission yet</li></ul>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><rect x="7" y="11" width="3" height="8"/><rect x="12" y="7" width="3" height="12"/><rect x="17" y="14" width="3" height="5"/></svg>
+          Running tally
+        </h4></div>
+        <p class="sub">Reconstructed from the operator's state tree. The chain holds only its root.</p>
+        <div id="tally-list" class="rows"><div class="empty">no votes counted yet</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================== LEDGER ================================= -->
+<section class="view" id="view-ledger">
+  <div class="viewhead">
+    <h3>Ethereum L1 <span class="domain c">trust domain 3 &middot; VotingRollupV2</span></h3>
+    <p>The only trust anchor. It verifies every batch proof in full, keeps the canonical nullifier registry, and rejects anything that does not check out.</p>
+  </div>
+
+  <div class="grid c12">
+    <div class="col12">
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+          Contract state
+        </h4></div>
+        <dl class="state">
+          <div><dt>stateRoot</dt><dd id="cs-root">&mdash;</dd></div>
+          <div><dt>batchCount</dt><dd id="cs-batches">0</dd></div>
+          <div><dt>nullifiers registered</dt><dd id="cs-nulls">0</dd></div>
+          <div><dt>votingActive</dt><dd id="cs-active">&mdash;</dd></div>
+          <div><dt>operator root matches</dt><dd id="cs-sync">&mdash;</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="col6 stack">
+      <div class="card">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Batches on chain
+          </h4>
+          <span class="chip spacer" id="batch-hint">click to inspect</span>
+        </div>
+        <div id="batch-list" class="rows"><div class="empty">none yet</div></div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><rect x="7" y="9" width="3" height="10"/><rect x="12" y="13" width="3" height="6"/><rect x="17" y="6" width="3" height="13"/></svg>
+            Gas per vote
+          </h4>
+          <span class="chip spacer" id="gas-sample">&mdash;</span>
+        </div>
+        <div id="gas-bars" class="bars"><div class="empty">submit a batch, then measure</div></div>
+        <button class="btn ghost block" id="btn-baselines" style="margin-top:14px">Measure baselines (per-vote ZK &amp; non-ZK)</button>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h10M7 17h6"/></svg>
+          Deployed contracts
+        </h4></div>
+        <div id="contract-links" class="rows"><div class="empty">loading&hellip;</div></div>
+      </div>
+    </div>
+
+    <div class="col6 stack">
+      <div class="card tint-c" id="sepolia-box">
+        <div class="cardhead">
+          <h4>
+            <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>
+            On public Ethereum
+          </h4>
+          <span class="chip ok spacer">Sepolia</span>
+        </div>
+        <p class="sub">The same pipeline, already mined on a real network. Verified links &mdash; open any of them.</p>
+        <div id="sepolia-list" class="rows"><div class="empty">loading&hellip;</div></div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          External observer
+        </h4></div>
+        <p class="sub">Re-verify a batch from chain calldata alone. This path never touches the operator.</p>
+        <button class="btn ghost block" id="btn-observe">Independently verify latest batch</button>
+        <ul class="checks" id="observer-list" style="margin-top:14px"><li class="muted">not run</li></ul>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+          Election lifecycle
+        </h4></div>
+        <div class="btnrow">
+          <button class="btn ghost small" id="btn-end">End voting (admin)</button>
+        </div>
+        <ul class="checks" id="lifecycle-list" style="margin-top:14px"><li class="muted">no action yet</li></ul>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg>
+          Chain console
+        </h4></div>
+        <pre class="term" id="chain-term">No transactions yet.</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================= EXPLORER ================================ -->
+<section class="view" id="view-explorer">
+  <div class="viewhead">
+    <h3>Block explorer <span class="domain c">public data only</span></h3>
+    <p>Read from the node over <code>eth_*</code> RPC. No operator involved &mdash; an external observer sees exactly this, and nothing more.</p>
+  </div>
+
+  <div class="btnrow" style="margin-bottom:16px">
+    <span class="chip" id="exp-chain">&mdash;</span>
+    <span class="chip" id="exp-head">&mdash;</span>
+  </div>
+
+  <div class="expgrid">
+    <div class="stack">
+      <div class="card">
+        <div class="cardhead">
+          <h4>Transactions</h4>
+          <span class="chip spacer" id="exp-txcount">&mdash;</span>
+        </div>
+        <div id="exp-txlist" class="rows tall"><div class="empty">loading&hellip;</div></div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><h4>Blocks</h4></div>
+        <div id="exp-blocklist" class="rows"><div class="empty">loading&hellip;</div></div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><h4>Contracts</h4></div>
+        <div id="exp-contracts" class="rows"><div class="empty">loading&hellip;</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><h4>Transaction detail</h4></div>
+      <div id="exp-detail"><div class="empty">select a transaction on the left</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== ATTACK PANEL ============================== -->
+<section class="view" id="view-attack">
+  <div class="viewhead">
+    <h3>Attack panel <span class="domain a">adversarial testing</span></h3>
+    <p>An attack dies at the lowest rung that can catch it, and the lower it dies the stronger the guarantee. Arm a voter-side fault here, then cast a ballot on the Voter Terminal.</p>
+  </div>
+
+  <div class="grid c12">
+    <div class="col5 stack">
+      <div class="card tint-e">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+          Voter-side fault
+        </h4></div>
+        <label class="field">
+          <span class="lbl">injected into the ballot before proving</span>
+          <select id="sel-attack">
+            <option value="none">None &mdash; honest ballot</option>
+            <optgroup label="Dies in the circuit (no proof can exist)">
+              <option value="non-binary-vote">Non-binary vote (vote = 2)</option>
+              <option value="out-of-range-candidate">Out-of-range candidate (= 7)</option>
+              <option value="ineligible-voter">Ineligible voter (secret not registered)</option>
+              <option value="forged-nullifier">Forged nullifier</option>
+            </optgroup>
+            <optgroup label="Proof is valid — dies later">
+              <option value="wrong-election-id">Cross-election replay (electionId = 999)</option>
+              <option value="forged-registry">Self-registered voter (attacker's own root)</option>
+              <option value="double-vote">Double vote (re-use this voter)</option>
+              <option value="tamper-proof">Tamper with the proof (pi_a[0] + 1)</option>
+              <option value="tamper-signal">Tamper with a public signal (candidate)</option>
+            </optgroup>
+          </select>
+        </label>
+        <p class="sub" id="attack-hint">Pick a fault, then go to the Voter Terminal and cast a ballot.</p>
+        <button class="btn danger block" id="btn-goto-voter">Arm &amp; go to Voter Terminal</button>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v6"/></svg>
+          Contract-level attacks
+        </h4></div>
+        <p class="sub">These go straight to Ethereum. Each should be refused by an explicit guard.</p>
+        <div class="btnrow">
+          <button class="btn danger small" id="btn-end-nonadmin">End voting as non-admin</button>
+          <button class="btn danger small" id="btn-zero">Deploy with zero verifier</button>
+          <button class="btn danger small" id="btn-replay">Replay latest batch</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col7 stack">
+      <div class="card">
+        <div class="cardhead"><h4>
+          <svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          Scenario catalogue
+        </h4></div>
+        <p class="sub">Every row below has been executed against this system. <b>L0</b> voter circuit &middot; <b>L1</b> operator &middot; <b>L2</b> batch circuit &middot; <b>L3</b> Ethereum.</p>
+        <div class="tablewrap">
+          <table class="scen">
+            <thead><tr><th>Scenario</th><th>Dies at</th><th>Observed</th></tr></thead>
+            <tbody>
+              <tr><td>Non-binary vote</td><td class="rung-cell" style="color:var(--ok)">L0</td><td><code>VoteProof.circom:73</code></td></tr>
+              <tr><td>Out-of-range candidate</td><td class="rung-cell" style="color:var(--ok)">L0</td><td><code>VoteProof.circom:80</code></td></tr>
+              <tr><td>Ineligible voter</td><td class="rung-cell" style="color:var(--ok)">L0</td><td><code>VoteProof.circom:62</code></td></tr>
+              <tr><td>Forged nullifier</td><td class="rung-cell" style="color:var(--ok)">L0</td><td><code>VoteProof.circom:69</code></td></tr>
+              <tr><td>Tampered proof / public signal</td><td class="rung-cell">L1</td><td><code>snarkjs verify → false</code></td></tr>
+              <tr><td>Tampered proof, operator complicit</td><td class="rung-cell">L3</td><td><code>"Invalid individual vote proof"</code></td></tr>
+              <tr><td>Cross-election replay</td><td class="rung-cell">L3</td><td><code>"Vote proof election ID mismatch"</code></td></tr>
+              <tr><td>Self-registered voter registry</td><td class="rung-cell">L3</td><td><code>"Vote proof merkle root mismatch"</code></td></tr>
+              <tr><td>Double vote, same batch</td><td class="rung-cell">L2</td><td><code>BatchStateUpdate.circom:104</code></td></tr>
+              <tr><td>Double vote, later batch</td><td class="rung-cell">L3</td><td><code>"Duplicate nullifier"</code></td></tr>
+              <tr><td>Operator inflates tally</td><td class="rung-cell">L2</td><td><code>BatchStateUpdate.circom:68</code></td></tr>
+              <tr><td>Operator tampers batch proof</td><td class="rung-cell">L3</td><td><code>"Invalid batch state proof"</code></td></tr>
+              <tr><td>Replay an accepted batch</td><td class="rung-cell">L3</td><td><code>"Invalid batch state proof"</code></td></tr>
+              <tr><td>Batch after voting closed</td><td class="rung-cell">L3</td><td><code>"Voting not active"</code></td></tr>
+              <tr><td>Non-admin ends voting</td><td class="rung-cell">L3</td><td><code>"Only admin"</code></td></tr>
+              <tr><td>Deploy with zero verifier</td><td class="rung-cell">L3</td><td><code>"…cannot be zero"</code></td></tr>
+              <tr><td><b>Operator censors a vote</b></td><td class="rung-cell" style="color:var(--error)">none</td><td>accepted; vote silently absent</td></tr>
+              <tr><td><b>Operator re-routes a ballot</b></td><td class="rung-cell" style="color:var(--error)">none</td><td>accepted; tally altered</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================= LADDER ================================== -->
+<div id="ladderbar">
+  <div class="ladderhead">
+    <h4>Defence ladder</h4>
+    <span class="cap" id="ladder-caption">An attack dies at the lowest rung that can catch it. The lower it dies, the stronger the guarantee.</span>
+  </div>
+  <div class="ladder">
+    <div class="rung" data-rung="L3"><b>L3</b><span>Ethereum L1</span><em>require() guards</em></div>
+    <div class="rung" data-rung="L2"><b>L2</b><span>Batch circuit</span><em>state &amp; nullifier constraints</em></div>
+    <div class="rung" data-rung="L1"><b>L1</b><span>Operator</span><em>snarkjs verify, mempool</em></div>
+    <div class="rung" data-rung="L0"><b>L0</b><span>Voter circuit</span><em>witness generation</em></div>
+    <div class="rung none" data-rung="NONE"><b>&#9888;</b><span>Not caught</span><em>known limitation</em></div>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<!-- =============================== LOG PANEL ================================= -->
+<div id="logpanel">
+  <div class="logbar" id="logbar">
+    <svg class="i sm" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+    <b>Event log</b>
+    <span class="spacer"></span>
+    <button class="btn ghost small" id="btn-clearlog">clear</button>
+  </div>
+  <pre id="eventlog"></pre>
+</div>
+
+<!-- ================================= OVERLAY ================================= -->
+<div id="overlay">
+  <div class="scrim" id="overlay-scrim"></div>
+  <div class="panel">
+    <div class="icon" id="overlay-icon">
+      <svg class="i lg" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+    </div>
+    <h3 id="overlay-title">Proof submitted</h3>
+    <p class="lede" id="overlay-lede"></p>
+    <div class="data" id="overlay-data"></div>
+    <button class="btn accent block" id="overlay-close">Return to terminal</button>
+  </div>
+</div>
+
+<script src="/vendor/snarkjs.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

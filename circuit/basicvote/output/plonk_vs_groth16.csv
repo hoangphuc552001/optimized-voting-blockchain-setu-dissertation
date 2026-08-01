@@ -1,0 +1,8 @@
+metric,groth16,plonk,unit
+setup_time,2.670,0.640,s
+proof_generation,215.06,2742.56,ms
+proof_generation_std,35.52,23.84,ms
+verification_time,8.426,8.304,ms
+proof_size,724,2101,bytes
+vkey_size,3257,1858,bytes
+constraints,6179,6179,count

@@ -18,6 +18,10 @@ module.exports = {
     artifacts: "./artifacts"
   },
   networks: {
+    hardhat: {
+      blockGasLimit: 30_000_000_000,
+      allowUnlimitedContractSize: true
+    },
     localhost: {
       chainId: 31337,
       url: "http://127.0.0.1:8547"

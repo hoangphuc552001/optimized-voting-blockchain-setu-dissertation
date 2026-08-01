@@ -12,7 +12,9 @@
     "test:rollup": "hardhat test test/VotingRollup.test.js",
     "generate:batch": "node scripts/generateBatchInput.js",
     "operator": "node operator/index.js",
-    "node": "hardhat node"
+    "node": "hardhat node",
+    "demo": "node demo/server.js",
+    "demo:sepolia": "node demo/sepolia.js"
   },
   "keywords": [
     "zk-snark",

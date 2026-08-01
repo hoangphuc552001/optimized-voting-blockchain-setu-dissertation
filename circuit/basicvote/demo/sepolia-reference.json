@@ -1,0 +1,47 @@
+{
+  "_comment": "Verified historical transactions from the Sepolia deployment of 20 March 2026. These are real, already-mined, and cost nothing to show. The demo surfaces them in the L1 pane in every mode, so a local run can still point at public Ethereum. Regenerate with: node demo/tools/verifySepolia.js",
+  "network": "sepolia",
+  "explorerBase": "https://sepolia.etherscan.io",
+  "votingRollupV2": "0x69FA7d7Ef06351da557197d50e1505aeF97aD04e",
+  "voteVerifier": "0x6a63D63C95AB0A9Ed58FDBfEC4b6573FE6385165",
+  "batchStateVerifier": "0x6695dd373507d1899e1B0D979A94C1F1A5819F9F",
+  "verifiedAt": "2026-08-01",
+  "transactions": [
+    {
+      "label": "Deploy VotingRollupV2",
+      "method": "constructor",
+      "hash": "0x76f0e3e2996d19c55404a9c014399ef76319cef560c6da71a85a385aced0920b",
+      "block": 10484637,
+      "date": "2026-03-20",
+      "gasUsed": 794594,
+      "calldataBytes": 3422,
+      "note": "Election genesis: the public voter Merkle root and election ID are fixed here, in public, before any vote exists."
+    },
+    {
+      "label": "Submit batch of 16 votes",
+      "method": "submitBatch",
+      "hash": "0x87c9fc1ead7d73c6c9a93de99f745a92cb4e120d324977d72c44e28d0b42c0d8",
+      "block": 10484638,
+      "date": "2026-03-20",
+      "gasUsed": 653707,
+      "gasPerVote": 40857,
+      "calldataBytes": 1156,
+      "voteCount": 16,
+      "nullifiersSubmitted": 16,
+      "spotCheckedProofs": 0,
+      "preStateRoot": "21545791430054675679721663567345713395464273214026699272957697111075114407152",
+      "postStateRoot": "8240366879696731382271577504751302204143491240186377704975799111243522789753",
+      "note": "16 ballots, one proof, one transaction, 1,156 bytes of calldata. The postStateRoot is bit-identical to the local 16-vote run, so the pipeline is reproducible across networks."
+    },
+    {
+      "label": "End voting",
+      "method": "endVoting",
+      "hash": "0xaece2e3793d99a218f17f97d8cc76aedd09cd0b3965524b0eeb3ab3f39e4275b",
+      "block": 10484639,
+      "date": "2026-03-20",
+      "gasUsed": 34383,
+      "calldataBytes": 4,
+      "note": "The final state root is now immutable and publicly auditable."
+    }
+  ]
+}
